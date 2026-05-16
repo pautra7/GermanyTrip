@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Germany Travel Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#C8922A;--gold-light:#FBF0D9;--gold-dark:#7A540F;
+  --dark:#1C1C1C;--charcoal:#2D2D2D;--mid:#666;
+  --bg:#F7F4EF;--white:#fff;--border:#E5DDD0;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* HEADER */
+#header{background:var(--dark);color:#fff;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:2px solid var(--gold);z-index:500}
+#header h1{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;white-space:nowrap}
+#header h1 span{color:var(--gold)}
+#nav{display:flex;gap:4px}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap}
+.nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:600}
+
+/* PAGES */
+.page{display:none;flex:1;overflow:hidden}
+.page.active{display:flex}
+
+/* ═══ PAGE 1 — CITY EXPLORER ═══ */
+#city-tabs-bar{background:var(--dark);padding:0 1.25rem;height:38px;display:flex;align-items:center;gap:4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.08)}
+.city-tab{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);padding:3px 11px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;transition:all .18s}
+.city-tab:hover{border-color:var(--gold);color:var(--gold)}
+.city-tab.active{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:600}
+#explorer-wrap{display:flex;flex:1;overflow:hidden}
+#city-map{flex:1;z-index:1}
+#sidebar{width:295px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#sb-head{padding:.9rem 1.2rem .7rem;border-bottom:1px solid var(--border)}
+#sb-city{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700}
+#sb-count{font-size:.7rem;color:var(--mid);margin-top:2px}
+#sb-list{flex:1;overflow-y:auto;padding:.4rem 0}
+#sb-list::-webkit-scrollbar{width:3px}
+#sb-list::-webkit-scrollbar-thumb{background:var(--border)}
+.litem{padding:.6rem 1.2rem;cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:9px;transition:background .15s}
+.litem:hover{background:var(--bg);border-left-color:#ddd}
+.litem.active{background:var(--gold-light);border-left-color:var(--gold)}
+.licon{width:30px;height:30px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;border:1px solid var(--border)}
+.litem.active .licon{background:var(--gold-light);border-color:var(--gold)}
+.lname{font-size:.81rem;font-weight:500;color:var(--dark);line-height:1.3}
+.ltype{font-size:.67rem;color:var(--mid);margin-top:1px}
+
+/* landmark popup */
+#lm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:9000;display:flex;align-items:flex-end;pointer-events:none;opacity:0;transition:opacity .22s}
+#lm-overlay.on{opacity:1;pointer-events:all}
+#lm-card{width:370px;background:var(--white);border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 -6px 32px rgba(0,0,0,.18);transform:translateY(24px);transition:transform .28s cubic-bezier(.34,1.56,.64,1);max-height:86vh;display:flex;flex-direction:column}
+#lm-overlay.on #lm-card{transform:translateY(0)}
+#lm-emoji{height:150px;display:flex;align-items:center;justify-content:center;font-size:3.8rem;background:var(--gold-light);position:relative;flex-shrink:0}
+#lm-close{position:absolute;top:10px;right:10px;width:27px;height:27px;background:rgba(0,0,0,.45);border:none;border-radius:50%;color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#lm-body{padding:1rem 1.25rem 1.4rem;overflow-y:auto}
+#lm-name{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:4px;line-height:1.25}
+#lm-tag{display:inline-block;background:var(--gold-light);color:var(--gold-dark);font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em}
+#lm-rating{font-size:.77rem;color:var(--mid);margin-bottom:.8rem}
+.ftitle{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-dark);margin-bottom:.55rem}
+.fitem{display:flex;gap:8px;margin-bottom:.6rem;align-items:flex-start}
+.fnum{width:19px;height:19px;background:var(--gold);color:var(--dark);border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ftxt{font-size:.8rem;line-height:1.5;color:#333}
+
+/* ═══ PAGE 2 — ITINERARY ═══ */
+#itin-inner{flex:1;overflow-y:auto;padding:1.25rem 1.75rem 2rem;background:var(--bg)}
+#itin-inner::-webkit-scrollbar{width:4px}
+#itin-inner::-webkit-scrollbar-thumb{background:var(--border)}
+.itin-header{margin-bottom:1.25rem}
+.itin-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.itin-header p{font-size:.8rem;color:var(--mid);margin-top:3px}
+.itin-table{background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.itin-grid{display:grid;grid-template-columns:1.7fr .95fr .95fr .45fr 2.4fr 1.3fr}
+.th{background:var(--dark);color:#fff;font-size:.69rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:.55rem .8rem;border-right:1px solid rgba(255,255,255,.1)}
+.th:last-child{border-right:none}
+.tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.tr:hover{background:var(--gold-light)}
+.tr:last-child{border-bottom:none}
+.td{padding:.68rem .8rem;font-size:.81rem;color:var(--dark);border-right:1px solid var(--border);align-self:stretch;display:flex;align-items:center}
+.td:last-child{border-right:none}
+.city-col{font-weight:600;gap:7px}
+.note-col{font-size:.73rem;color:var(--mid);line-height:1.4;flex-direction:column;align-items:flex-start;justify-content:center}
+.train-hint{margin-top:4px;font-size:.69rem;color:#1A4F8A;font-style:italic}
+.dur-col{font-weight:600}
+.badge{display:inline-block;font-size:.66rem;font-weight:600;padding:2px 7px;border-radius:9px;margin:2px 2px 2px 0}
+.b-done{background:#E3F5E3;color:#2A7A2A}
+.b-train{background:#E6EFF9;color:#1A4F8A}
+.b-tbd{background:#FFF3CD;color:#856404}
+.tfoot{background:var(--dark);display:grid;grid-template-columns:1.7fr .95fr .95fr .45fr 2.4fr 1.3fr}
+.tfoot .td{color:#fff;font-weight:600;border-right:1px solid rgba(255,255,255,.12)}
+.tfoot .td:last-child{border-right:none}
+
+/* ═══ PAGE 3 — OVERVIEW MAP ═══ */
+#overview-wrap{display:flex;flex:1;overflow:hidden}
+#overview-map{flex:1;z-index:1}
+#ov-panel{width:270px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#ov-head{padding:.85rem 1.1rem .65rem;border-bottom:1px solid var(--border)}
+#ov-head h2{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700}
+#ov-head p{font-size:.7rem;color:var(--mid);margin-top:2px}
+#ov-stops{flex:1;overflow-y:auto;padding:.4rem 0}
+#ov-stops::-webkit-scrollbar{width:3px}
+#ov-stops::-webkit-scrollbar-thumb{background:var(--border)}
+.ov-stop{padding:.6rem 1.1rem;cursor:pointer;border-left:3px solid transparent;transition:background .15s;display:flex;align-items:center;gap:9px}
+.ov-stop:hover{background:var(--bg)}
+.ov-stop.active{background:var(--gold-light);border-left-color:var(--gold)}
+.snum{width:22px;height:22px;background:var(--gold);color:var(--dark);border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ov-stop-name{font-size:.83rem;font-weight:600;color:var(--dark)}
+.ov-stop-dates{font-size:.7rem;color:var(--mid);margin-top:1px}
+.ov-stop-dur{font-size:.68rem;color:var(--gold-dark);font-weight:500;margin-top:2px}
+
+/* overview popup */
+#ov-popup{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .2s}
+#ov-popup.on{opacity:1;pointer-events:all}
+#ov-card{background:var(--white);border-radius:14px;padding:1.4rem;width:330px;box-shadow:0 8px 40px rgba(0,0,0,.18);transform:scale(.95);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+#ov-popup.on #ov-card{transform:scale(1)}
+.ovc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.9rem}
+.ovc-emoji{font-size:2rem;margin-right:.65rem}
+.ovc-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;line-height:1.2}
+.ovc-sub{font-size:.73rem;color:var(--mid);margin-top:3px}
+#ovc-close{background:none;border:none;font-size:1.05rem;cursor:pointer;color:var(--mid);padding:2px 5px}
+.ovc-dates{display:flex;gap:.65rem;margin-bottom:.85rem}
+.ovc-date-box{flex:1;background:var(--bg);border-radius:7px;padding:.55rem .7rem;border:1px solid var(--border)}
+.ovc-date-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);font-weight:600}
+.ovc-date-val{font-size:.85rem;font-weight:600;color:var(--dark);margin-top:2px}
+.ovc-dur{display:inline-block;background:var(--gold-light);color:var(--gold-dark);font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:11px;margin-bottom:.85rem}
+.ovc-transport{font-size:.76rem;color:#1A4F8A;background:#E6EFF9;padding:.45rem .7rem;border-radius:6px;margin-bottom:.7rem}
+.ovc-notes{font-size:.77rem;color:var(--mid);line-height:1.5}
+.ovc-accom{font-size:.73rem;padding:.4rem .7rem;border-radius:6px;margin-top:.55rem}
+.ovc-accom.booked{background:#E3F5E3;color:#2A7A2A}
+.ovc-accom.tbd{background:#FFF3CD;color:#856404}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Germany <span>Trip 2026</span></h1>
+  <div id="nav">
+    <button class="nav-btn active" onclick="showPage('explorer')">🗺 City Explorer</button>
+    <button class="nav-btn" onclick="showPage('itinerary')">📋 Itinerary</button>
+    <button class="nav-btn" onclick="showPage('overview')">🇩🇪 Trip Overview</button>
+  </div>
+</div>
+
+<!-- PAGE 1 -->
+<div id="page-explorer" class="page active" style="flex-direction:column">
+  <div id="city-tabs-bar">
+    <button class="city-tab active" data-city="Munich" onclick="renderCity('Munich')">Munich</button>
+    <button class="city-tab" data-city="Würzburg" onclick="renderCity('Würzburg')">Würzburg</button>
+    <button class="city-tab" data-city="Dresden" onclick="renderCity('Dresden')">Dresden</button>
+    <button class="city-tab" data-city="Leipzig" onclick="renderCity('Leipzig')">Leipzig</button>
+    <button class="city-tab" data-city="Berlin" onclick="renderCity('Berlin')">Berlin</button>
+    <button class="city-tab" data-city="Münster" onclick="renderCity('Münster')">Münster</button>
+  </div>
+  <div id="explorer-wrap">
+    <div id="city-map"></div>
+    <div id="sidebar">
+      <div id="sb-head"><div id="sb-city">Munich</div><div id="sb-count"></div></div>
+      <div id="sb-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div id="page-itinerary" class="page" style="flex-direction:column;overflow:hidden">
+  <div id="itin-inner">
+    <div class="itin-header">
+      <h2>Trip Itinerary — Germany 2026</h2>
+      <p>May 19 – June 9 &nbsp;·&nbsp; 21 days total &nbsp;·&nbsp; Click any row for details</p>
+    </div>
+    <div class="itin-table">
+      <div class="itin-grid">
+        <div class="th">Destination</div>
+        <div class="th">Arrival</div>
+        <div class="th">Departure</div>
+        <div class="th">Days</div>
+        <div class="th">Notes</div>
+        <div class="th">Status</div>
+      </div>
+      <div id="itin-rows"></div>
+      <div class="tfoot">
+        <div class="td">Total</div>
+        <div class="td"></div>
+        <div class="td"></div>
+        <div class="td">21</div>
+        <div class="td"></div>
+        <div class="td"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3 -->
+<div id="page-overview" class="page" style="flex-direction:column;overflow:hidden">
+  <div id="overview-wrap">
+    <div id="overview-map"></div>
+    <div id="ov-panel">
+      <div id="ov-head"><h2>Trip Route</h2><p>9 stops · May 19 – June 9</p></div>
+      <div id="ov-stops"></div>
+    </div>
+  </div>
+</div>
+
+<!-- landmark popup -->
+<div id="lm-overlay" onclick="closeLm(event)">
+  <div id="lm-card">
+    <div id="lm-emoji"><button id="lm-close" onclick="closeLm(null,true)">✕</button><span id="lm-ech"></span></div>
+    <div id="lm-body">
+      <div id="lm-name"></div><div id="lm-tag"></div><div id="lm-rating"></div>
+      <div class="ftitle">3 things to know</div>
+      <div id="lm-facts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- overview popup -->
+<div id="ov-popup" onclick="closeOv(event)">
+  <div id="ov-card">
+    <div class="ovc-top">
+      <div style="display:flex;align-items:center">
+        <span class="ovc-emoji" id="ovc-emoji"></span>
+        <div><div class="ovc-title" id="ovc-title"></div><div class="ovc-sub" id="ovc-sub"></div></div>
+      </div>
+      <button id="ovc-close" onclick="closeOv(null,true)">✕</button>
+    </div>
+    <div class="ovc-dates" id="ovc-dates"></div>
+    <div class="ovc-dur" id="ovc-dur"></div>
+    <div id="ovc-transport" class="ovc-transport" style="display:none"></div>
+    <div class="ovc-notes" id="ovc-notes"></div>
+    <div id="ovc-accom" class="ovc-accom" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const ITIN=[
+  {city:'Departure',    emoji:'✈️', start:'5/19/2026',end:'5/20/2026',days:1, notes:'Land in the morning in Munich',                          accom:'',     trans:''},
+  {city:'Munich',       emoji:'🏙️', start:'5/20/2026',end:'5/23/2026',days:3, notes:'Arrive in the morning; Leave in the afternoon',          accom:'Done', trans:''},
+  {city:'Würzburg',     emoji:'🏰', start:'5/23/2026',end:'5/25/2026',days:2, notes:'Arrive in the evening; Leave in the afternoon',          accom:'Done', trans:'Train'},
+  {city:'Dresden',      emoji:'⛪', start:'5/25/2026',end:'5/28/2026',days:3, notes:'Arrive in the evening; Leave in morning',                accom:'',     trans:'Train'},
+  {city:'Leipzig',      emoji:'🗿', start:'5/28/2026',end:'5/31/2026',days:3, notes:'Arrive in the morning; Leave in the morning',            accom:'Done', trans:'Train'},
+  {city:'Berlin',       emoji:'🏛️', start:'5/31/2026',end:'6/3/2026', days:3, notes:'Arrive in the morning; Leave in the morning',            accom:'',     trans:'Train'},
+  {city:'Münster',      emoji:'🕌', start:'6/3/2026', end:'6/6/2026', days:3, notes:'Arrive in the afternoon; Leave in the morning',          accom:'Done', trans:'Train'},
+  {city:'Helmstedt',    emoji:'🌿', start:'6/6/2026', end:'6/7/2026', days:1, notes:'Arrive in the afternoon; Leave in the afternoon',        accom:'',     trans:''},
+  {city:'Braunschweig', emoji:'🏯', start:'6/7/2026', end:'6/9/2026', days:2, notes:'Arrive in the afternoon; Leave in the morning',          accom:'Done', trans:''},
+  {city:'Hanover',      emoji:'🚉', start:'6/9/2026', end:'6/9/2026', days:0, notes:'Travel Home',                                            accom:'',     trans:''},
+];
+
+const OV_STOPS=[
+  {city:'Munich',       emoji:'🏙️',lat:48.1374,lng:11.5755,start:'May 20',end:'May 23',days:3,trans:'Flight arrival',accom:'Done', notes:'Arrive in the morning; leave in the afternoon. 3 full days to explore.'},
+  {city:'Würzburg',     emoji:'🏰',lat:49.7927,lng:9.9391, start:'May 23',end:'May 25',days:2,trans:'Train',        accom:'Done', notes:'Arrive in the evening; leave in the afternoon.'},
+  {city:'Dresden',      emoji:'⛪',lat:51.0519,lng:13.7415,start:'May 25',end:'May 28',days:3,trans:'Train',        accom:'',     notes:'Arrive in the evening; leave in the morning.'},
+  {city:'Leipzig',      emoji:'🗿',lat:51.3406,lng:12.3747,start:'May 28',end:'May 31',days:3,trans:'Train',        accom:'Done', notes:'Arrive in the morning; leave in the morning.'},
+  {city:'Berlin',       emoji:'🏛️',lat:52.5163,lng:13.3777,start:'May 31',end:'Jun 3', days:3,trans:'Train',        accom:'',     notes:'Arrive in the morning; leave in the morning.'},
+  {city:'Münster',      emoji:'🕌',lat:51.9622,lng:7.6282, start:'Jun 3', end:'Jun 6', days:3,trans:'Train',        accom:'Done', notes:'Arrive in the afternoon; leave in the morning.'},
+  {city:'Helmstedt',    emoji:'🌿',lat:52.2284,lng:11.0101,start:'Jun 6', end:'Jun 7', days:1,trans:'TBD',          accom:'',     notes:'Arrive in the afternoon; leave in the afternoon.'},
+  {city:'Braunschweig', emoji:'🏯',lat:52.2689,lng:10.5268,start:'Jun 7', end:'Jun 9', days:2,trans:'TBD',          accom:'Done', notes:'Arrive in the afternoon; leave in the morning.'},
+  {city:'Hanover',      emoji:'🚉',lat:52.3759,lng:9.7320, start:'Jun 9', end:'Jun 9', days:0,trans:'',             accom:'',     notes:'Departure point — fly home from Hanover.'},
+];
+
+const CITIES={
+  Munich:{center:[48.1374,11.5755],zoom:13,landmarks:[
+    {name:"St. Peter's Tower",emoji:"⛪",type:"Tower / Panorama",lat:48.1366805,lng:11.5756044,rating:4.7,facts:["Climb 306 steps for the best 360° panoramic view of Munich's old town and the Alps — tickets are just €5.","Munich's oldest parish church, with parts dating to the 14th century blending Gothic and Baroque styles.","Offers a rare aerial perspective directly over Marienplatz — arrive early on clear days for Alps views."]},
+    {name:"Rathaus-Glockenspiel",emoji:"🕰️",type:"Clock / Landmark",lat:48.1374724,lng:11.5754855,rating:4.7,facts:["Performs daily at 11am and 12pm with 43 bells and 32 life-sized figures re-enacting Bavarian historical scenes.","The neo-Gothic New Town Hall housing it took over 40 years to build (1867–1909).","The show depicts Duke Wilhelm V's 1568 wedding and the Schäfflertanz dance celebrating the end of a plague."]},
+    {name:"Munich Residenz",emoji:"🏰",type:"Palace / Museum",lat:48.1417978,lng:11.579486,rating:4.6,facts:["Germany's largest city palace with over 130 rooms — home to the Wittelsbach dynasty for 400 years.","The Treasury holds the gem-encrusted Statue of St. George, one of the world's greatest royal treasures.","Plan 2–3 hours minimum; the complex also includes the beautiful Hofgarten court garden."]},
+    {name:"Viktualienmarkt",emoji:"🛒",type:"Food Market",lat:48.1353899,lng:11.5760761,rating:4.6,facts:["One of Europe's most famous daily open-air food markets, operating since 1807 with 200+ stalls.","A traditional beer garden at its center makes for a perfect Bavarian lunch stop.","Closed Sundays — visit any other day for cheeses, meats, flowers, and local produce."]},
+    {name:"Asamkirche",emoji:"⛩️",type:"Baroque Church",lat:48.1351434,lng:11.5696647,rating:4.8,facts:["Built 1733–46 as the Asam brothers' private chapel — one of Europe's finest late-Baroque interiors.","Free to enter; gold leaf, frescoes, and stucco cover every centimeter of the tiny nave.","Tucked along a shopping street — easy to miss from outside, absolutely staggering within."]},
+    {name:"Frauenkirche",emoji:"🕌",type:"Gothic Cathedral",lat:48.1386649,lng:11.5730127,rating:4.6,facts:["The twin onion-domed towers (99m tall) are Munich's iconic silhouette and the city's unofficial symbol.","Look for the 'Devil's Footprint' near the entrance — legend says the Devil made a bet with the architect.","Construction began in 1468 and was completed in just 20 years — remarkably fast for a cathedral."]},
+    {name:"English Garden",emoji:"🌿",type:"City Park",lat:48.1642323,lng:11.6055522,rating:4.7,facts:["At 3.7 km² it's larger than New York's Central Park — one of the world's greatest urban parks.","Famous for its artificial river wave where surfers ride year-round near the Eisbach stream.","The Chinese Tower beer garden inside is one of Munich's most beloved outdoor spots."]},
+    {name:"Nymphenburg Palace",emoji:"🏯",type:"Palace & Gardens",lat:48.1582675,lng:11.5033143,rating:4.6,facts:["Built in 1664 as a summer residence, the palace facade stretches an extraordinary 632 meters wide.","Home to the 'Gallery of Beauties' — 36 portraits commissioned by King Ludwig I.","The surrounding park is free to stroll and covers 200 hectares with canals, fountains, and pavilions."]},
+    {name:"Augustiner-Keller",emoji:"🍺",type:"Beer Garden",lat:48.1433523,lng:11.5519791,rating:4.4,facts:["One of Munich's oldest beer gardens, dating to 1812, seating up to 5,000 guests under chestnut trees.","Serves Augustiner beer from rare wooden barrels — a tradition almost extinct even in Bavaria.","Expect hearty Bavarian food, traditional decor, and an irresistibly lively atmosphere."]}
+  ]},
+  'Würzburg':{center:[49.791,9.929],zoom:14,landmarks:[
+    {name:"Würzburg Residenz",emoji:"🏛️",type:"UNESCO Palace",lat:49.7927423,lng:9.9391185,rating:4.7,facts:["A UNESCO World Heritage Site — one of Europe's finest Baroque palaces, designed by Balthasar Neumann.","Contains the world's largest ceiling fresco (677 m²) by Tiepolo in the Grand Staircase hall.","Free English guided tours available — check timing in advance as English sessions are limited."]},
+    {name:"Alte Mainbrücke",emoji:"🌉",type:"Historic Bridge",lat:49.7929931,lng:9.9261044,rating:4.7,facts:["Built in the 15th century — one of Germany's oldest stone bridges, lined with 12 Baroque sandstone statues.","Often compared to Prague's Charles Bridge — equally beautiful and much less crowded.","Local tradition: enjoy a glass of Franconian wine directly on the bridge at sunset."]},
+    {name:"St. Kilian's Cathedral",emoji:"⛪",type:"Cathedral",lat:49.7934348,lng:9.9319943,rating:4.6,facts:["One of Germany's great Romanesque cathedrals, with origins stretching to the 11th century.","Almost entirely destroyed in Allied bombing in March 1945 — the restored interior blends old and new powerfully.","Dedicated to St. Kilian, the Irish missionary who brought Christianity to Franconia in the 7th century."]},
+    {name:"Marienberg Fortress",emoji:"🏰",type:"Fortress / Museum",lat:49.7897393,lng:9.9201319,rating:4.6,facts:["Perched above the Main River since the 13th century, offering panoramic views over the city.","The vineyard walk up from the Alte Mainbrücke is one of the most scenic strolls in Germany.","The Mainfränkisches Museum inside holds Tilman Riemenschneider's extraordinary medieval wood sculptures."]},
+    {name:"Käppele Sanctuary",emoji:"⛩️",type:"Pilgrimage Church",lat:49.7842417,lng:9.9219083,rating:4.8,facts:["A stunning Baroque pilgrimage chapel by Balthasar Neumann perched on a hill with sweeping city views.","A dramatic staircase with Stations of the Cross sculptures guides you on the approach.","Considered one of the finest Baroque interiors in Germany — the ceiling paintings are breathtaking."]}
+  ]},
+  Dresden:{center:[51.053,13.738],zoom:14,landmarks:[
+    {name:"Frauenkirche",emoji:"⛪",type:"Church / Symbol",lat:51.0518734,lng:13.7415216,rating:4.8,facts:["Destroyed by WWII bombing in 1945, rebuilt stone by stone and reopened in 2005 as a symbol of reconciliation.","Climb to the dome (€10) for breathtaking 360° views over Dresden's skyline and the Elbe.","The dark stones in the facade are original — deliberately left charred to honor the building's wartime history."]},
+    {name:"Dresden Zwinger",emoji:"🏛️",type:"Baroque Palace Complex",lat:51.0529962,lng:13.7339266,rating:4.7,facts:["Built 1710–1728 for Augustus the Strong — one of Germany's greatest Baroque architectural masterpieces.","Houses three world-class museums including the Old Masters Gallery with Raphael's Sistine Madonna.","The courtyard and gardens are free to enter — feel like stepping into a royal fairy tale."]},
+    {name:"Semperoper",emoji:"🎭",type:"Opera House",lat:51.0544862,lng:13.7352762,rating:4.8,facts:["One of Europe's most celebrated opera houses, designed by Gottfried Semper, opened in 1841.","Home of the Saxon State Opera, which premiered works by Richard Wagner and Richard Strauss here.","Guided tours of the spectacular Neo-Renaissance interior are available on non-performance days."]},
+    {name:"Residenzschloss",emoji:"🏰",type:"Royal Palace",lat:51.0524975,lng:13.7366604,rating:4.7,facts:["The former seat of Saxon electors and kings, with nearly 800 years of history — magnificently restored after WWII.","The Historic Green Vault inside holds one of Europe's greatest royal treasure collections.","The Hausmann Tower can be climbed for a panorama of central Dresden."]},
+    {name:"Brühl's Terrace",emoji:"🌅",type:"Promenade / Viewpoint",lat:51.0532474,lng:13.7426731,rating:4.7,facts:["Called the 'Balcony of Europe' since the 18th century — elevated walkway above the Elbe with spectacular views.","Built in the 1730s as Count von Brühl's private garden before opening to the public in 1814.","Sunset over the Elbe with Dresden's Baroque skyline is one of Germany's most romantic views."]},
+    {name:"Fürstenzug",emoji:"🎨",type:"Porcelain Mural",lat:51.0527909,lng:13.7389032,rating:4.8,facts:["A 102-meter-long mural of 25,000 Meissen porcelain tiles — the world's largest porcelain artwork.","Depicts a procession of 35 Saxon rulers spanning 700 years of Wettin dynasty history.","Remarkably survived the 1945 bombing intact, and the porcelain has barely faded in over 100 years."]}
+  ]},
+  Leipzig:{center:[51.338,12.375],zoom:13,landmarks:[
+    {name:"Völkerschlachtdenkmal",emoji:"🗿",type:"Monument / Memorial",lat:51.3123671,lng:12.4132675,rating:4.7,facts:["Completed in 1913 for the 100th anniversary of the Battle of Nations — at 91 meters it was Europe's tallest monument.","Inside, giant stone warriors watch over a crypt; climb to two platforms for spectacular Leipzig panoramas.","The battle (1813) involved over 600,000 soldiers — the largest in European history before WWI."]},
+    {name:"St. Thomas Church",emoji:"⛪",type:"Historic Church",lat:51.339317,lng:12.3726797,rating:4.7,facts:["Johann Sebastian Bach served as cantor here from 1723 until his death in 1750 — his tomb is beneath the chancel.","The Thomanerchor boys choir has performed here continuously for over 800 years.","Martin Luther preached here in 1539 when Leipzig adopted the Protestant Reformation."]},
+    {name:"St. Nicholas Church",emoji:"🕌",type:"Historic Church",lat:51.3403205,lng:12.378489,rating:4.7,facts:["Birthplace of the peaceful revolution — Monday Prayers here eventually led to the fall of the Berlin Wall in 1989.","The striking interior blends Gothic structure with a Neoclassical redesign featuring white palm-leaf columns.","Bach's St. John Passion had its world premiere here in 1724."]},
+    {name:"Mädler-Passage",emoji:"🛍️",type:"Historic Arcade",lat:51.3393977,lng:12.3755844,rating:4.7,facts:["A stunning Art Nouveau shopping arcade from 1914 — one of Germany's most beautiful indoor passages.","Goethe's Faust was partly inspired by Auerbachs Keller in the basement here, operating since 1525.","Goethe himself was a regular at Auerbachs Keller during his student years in Leipzig."]},
+    {name:"Marktplatz Leipzig",emoji:"🏛️",type:"Central Square",lat:51.3406151,lng:12.3746965,rating:4.6,facts:["Leipzig's central gathering point since the city received trading rights in 1165.","The Altes Rathaus bordering the square is a magnificent Renaissance building from 1556, now a history museum.","On Fridays and Saturdays the square comes alive with markets, street performers, and city life."]}
+  ]},
+  Berlin:{center:[52.516,13.388],zoom:13,landmarks:[
+    {name:"Brandenburg Gate",emoji:"🏛️",type:"Landmark / Symbol",lat:52.5162746,lng:13.377704,rating:4.7,facts:["Completed in 1791 — Berlin's most iconic symbol, stranded in no-man's-land of the Berlin Wall for 28 years.","The Quadriga sculpture on top was taken to Paris by Napoleon and returned in 1814.","A symbol of German reunification — most spectacular illuminated at night."]},
+    {name:"Reichstag",emoji:"🏛️",type:"Government Building",lat:52.5186202,lng:13.3761871,rating:4.7,facts:["Germany's parliament, redesigned with a glass dome by Sir Norman Foster after reunification.","The glass dome is free to visit but must be booked online in advance — bring ID for entry.","Audio guides inside the dome respond to your exact location on the spiraling ramp."]},
+    {name:"Berlin Cathedral",emoji:"⛪",type:"Cathedral",lat:52.5190608,lng:13.401078,rating:4.6,facts:["The massive Protestant cathedral took 11 years to build (1894–1905) and can be explored from crypt to dome.","Climb ~270 steps to the top for some of Berlin's finest panoramic views over Museum Island and the Spree.","The crypt beneath holds over 90 sarcophagi of the Hohenzollern dynasty — Prussia's royal family."]},
+    {name:"Holocaust Memorial",emoji:"🕯️",type:"Memorial",lat:52.5139474,lng:13.3787126,rating:4.6,facts:["Designed by Peter Eisenman — 2,711 concrete stelae cover 19,000 m², creating a disorienting labyrinth.","Free to visit 24 hours a day; the underground Information Centre is deeply moving.","Formally titled 'Memorial to the Murdered Jews of Europe,' opened in 2005."]},
+    {name:"Berlin Wall Memorial",emoji:"🧱",type:"Historic Memorial",lat:52.535052,lng:13.3901898,rating:4.6,facts:["One of the most authentic sections of the full Berlin Wall system, including the 'death strip.'","Memorial plaques honor the over 140 people who died trying to cross the wall (1961–1989).","Always open and free outdoors; the museum building is closed on Mondays."]},
+    {name:"Charlottenburg Palace",emoji:"🏯",type:"Baroque Palace",lat:52.5209319,lng:13.2956165,rating:4.6,facts:["Berlin's largest palace, built in 1699 for Queen Sophie Charlotte — one of the world's great Baroque residences.","The Schlosspark is free to explore and includes French gardens, an orangery, and a beautiful lake pavilion.","Closed on Mondays; the golden Prussian eagle atop the dome is one of Berlin's iconic silhouettes."]},
+    {name:"Museum Island",emoji:"🎨",type:"UNESCO Museum Complex",lat:52.5169328,lng:13.4018996,rating:4.7,facts:["A UNESCO World Heritage Site with five world-class museums including the Pergamon and Neues Museum.","The Pergamon Museum contains the spectacular Pergamon Altar (180 BC) and the Ishtar Gate of Babylon.","Allow a full day minimum — the collections span 6,000 years of human history."]},
+    {name:"Gendarmenmarkt",emoji:"🏙️",type:"Square / Architecture",lat:52.5132122,lng:13.3925122,rating:4.8,facts:["Often voted Berlin's most beautiful square, flanked by the French and German Cathedrals and the Konzerthaus.","Built by Prussian King Frederick the Great in the 18th century as part of his grand vision for Berlin.","The Christmas market here each December is one of Germany's most atmospheric."]},
+    {name:"Hackescher Markt",emoji:"🌆",type:"Market / Cultural Hub",lat:52.5237159,lng:13.4022679,rating:4.5,facts:["A vibrant S-Bahn square in Berlin-Mitte, surrounded by the Art Nouveau Hackesche Höfe courtyard complex.","The Hackesche Höfe (1907) has eight interconnected courtyards with galleries, cafes, and boutiques.","One of Berlin's best neighborhoods for street food, independent shops, and nightlife."]}
+  ]},
+  'Münster':{center:[51.962,7.628],zoom:14,landmarks:[
+    {name:"Prinzipalmarkt",emoji:"🏛️",type:"Historic Square",lat:51.9622138,lng:7.628184,rating:4.7,facts:["Münster's stunning Gothic arcaded main street — destroyed in WWII and faithfully rebuilt stone by stone.","The arcades (Lauben) shelter pedestrians and give the street a medieval character unique in Germany.","One of Germany's most beloved Christmas markets takes place here each December."]},
+    {name:"St. Paul's Cathedral",emoji:"⛪",type:"Cathedral",lat:51.9629806,lng:7.6257716,rating:4.7,facts:["A magnificent Romanesque-Gothic cathedral nearly 800 years old, one of the finest in Westphalia.","The Astronomical Clock inside (1540) is a marvel of medieval engineering still running accurately.","The Peace of Westphalia was negotiated partly here in 1648, ending the Thirty Years' War and reshaping Europe."]},
+    {name:"St. Lambert's Church",emoji:"🕌",type:"Gothic Church",lat:51.9629349,lng:7.628904,rating:4.6,facts:["Famous for the three iron cages on its tower — they held executed Anabaptist leaders in 1536 as a warning.","The church's late-Gothic architecture and slender tower define Münster's skyline.","In Advent, free brass band and organ recitals are held daily at 5pm — a beautiful tradition."]},
+    {name:"Stadthafen",emoji:"⚓",type:"Harbor Area",lat:51.9512735,lng:7.638834,rating:4.5,facts:["A transformed industrial harbor now filled with creative restaurants, bars, a cinema, and cultural spaces.","One of Münster's most relaxed spots for an evening drink or outdoor meal along the water.","The harbor's converted brick warehouses are now some of the city's trendiest venues."]},
+    {name:"Promenade",emoji:"🌿",type:"Greenway / Walking Path",lat:51.9668277,lng:7.6233824,rating:4.8,facts:["A 4.5 km circular green belt around Münster's entire old town, built on old city fortifications.","Münster is Germany's cycling capital — the Promenade is a beloved cycle highway used by thousands daily.","The route passes moats, art installations, university buildings, and beautiful parkland."]}
+  ]}
+};
+
+/* ─── NAV ─── */
+let cityMap=null, ovMap=null, cityMarkers=[];
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelector(`.nav-btn[onclick="showPage('${name}')"]`).classList.add('active');
+  if(name==='explorer'&&!cityMap) initCityMap();
+  if(name==='overview'&&!ovMap)   initOvMap();
+  setTimeout(()=>{
+    if(name==='explorer'&&cityMap) cityMap.invalidateSize();
+    if(name==='overview'&&ovMap)   ovMap.invalidateSize();
+  },60);
+}
+
+/* ─── PAGE 1 ─── */
+function initCityMap(){
+  cityMap=L.map('city-map',{zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(cityMap);
+  renderCity('Munich');
+}
+function renderCity(name){
+  document.querySelectorAll('.city-tab').forEach(t=>t.classList.toggle('active',t.dataset.city===name));
+  cityMarkers.forEach(m=>cityMap.removeLayer(m)); cityMarkers=[];
+  const city=CITIES[name];
+  cityMap.setView(city.center,city.zoom,{animate:true});
+  document.getElementById('sb-city').textContent=name;
+  document.getElementById('sb-count').textContent=city.landmarks.length+' landmarks';
+  const list=document.getElementById('sb-list'); list.innerHTML='';
+  city.landmarks.forEach((lm,i)=>{
+    const icon=L.divIcon({html:`<div style="width:12px;height:12px;background:#1C1C1C;border:2.5px solid #C8922A;border-radius:50%;cursor:pointer"></div>`,iconSize:[12,12],iconAnchor:[6,6],className:''});
+    const m=L.marker([lm.lat,lm.lng],{icon}).addTo(cityMap);
+    m.on('click',()=>openLm(lm,name,i)); cityMarkers.push(m);
+    const d=document.createElement('div'); d.className='litem'; d.id=`li-${name}-${i}`;
+    d.innerHTML=`<div class="licon">${lm.emoji}</div><div><div class="lname">${lm.name}</div><div class="ltype">${lm.type}</div></div>`;
+    d.onclick=()=>{cityMap.setView([lm.lat,lm.lng],Math.max(cityMap.getZoom(),15),{animate:true});openLm(lm,name,i);};
+    list.appendChild(d);
+  });
+}
+function openLm(lm,city,idx){
+  document.querySelectorAll('.litem').forEach(e=>e.classList.remove('active'));
+  const el=document.getElementById(`li-${city}-${idx}`);
+  if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  document.getElementById('lm-ech').textContent=lm.emoji;
+  document.getElementById('lm-name').textContent=lm.name;
+  document.getElementById('lm-tag').textContent=city;
+  document.getElementById('lm-rating').innerHTML=lm.rating?'⭐'.repeat(Math.round(lm.rating))+` <span style="margin-left:4px">${lm.rating} / 5.0</span>`:'';
+  document.getElementById('lm-facts').innerHTML=lm.facts.map((f,i)=>`<div class="fitem"><div class="fnum">${i+1}</div><div class="ftxt">${f}</div></div>`).join('');
+  document.getElementById('lm-overlay').classList.add('on');
+}
+function closeLm(e,force){
+  if(force||(e&&e.target===document.getElementById('lm-overlay'))){
+    document.getElementById('lm-overlay').classList.remove('on');
+    document.querySelectorAll('.litem').forEach(el=>el.classList.remove('active'));
+  }
+}
+
+/* ─── PAGE 2 ─── */
+function buildItin(){
+  const c=document.getElementById('itin-rows');
+  ITIN.forEach((row,i)=>{
+    const d=document.createElement('div'); d.className='itin-grid tr'; d.id=`irow-${i}`;
+    const badges=[];
+    if(row.accom==='Done') badges.push(`<span class="badge b-done">✓ Accom Booked</span>`);
+    else if(row.days>0&&row.city!=='Hanover') badges.push(`<span class="badge b-tbd">⚠ Accom TBD</span>`);
+    if(row.trans==='Train') badges.push(`<span class="badge b-train">🚆 Train</span>`);
+    d.innerHTML=`
+      <div class="td city-col"><span>${row.emoji}</span>${row.city}</div>
+      <div class="td">${row.start}</div>
+      <div class="td">${row.end}</div>
+      <div class="td dur-col">${row.days>0?row.days:'—'}</div>
+      <div class="td note-col">${row.notes}${row.trans==='Train'?'<div class="train-hint">🚆 Train details to be added</div>':''}</div>
+      <div class="td" style="flex-wrap:wrap;gap:3px">${badges.join('')}</div>`;
+    c.appendChild(d);
+  });
+}
+
+/* ─── PAGE 3 ─── */
+function initOvMap(){
+  ovMap=L.map('overview-map',{zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(ovMap);
+  ovMap.setView([51.2,10.6],6);
+  L.polyline(OV_STOPS.map(s=>[s.lat,s.lng]),{color:'#C8922A',weight:2.5,opacity:.65,dashArray:'6 5'}).addTo(ovMap);
+  const panel=document.getElementById('ov-stops');
+  OV_STOPS.forEach((stop,i)=>{
+    const icon=L.divIcon({html:`<div style="width:28px;height:28px;background:#C8922A;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#1C1C1C;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer">${i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14],className:''});
+    const m=L.marker([stop.lat,stop.lng],{icon}).addTo(ovMap);
+    m.on('click',()=>openOv(stop,i));
+    const d=document.createElement('div'); d.className='ov-stop'; d.id=`ovs-${i}`;
+    d.innerHTML=`<div class="snum">${i+1}</div><div><div class="ov-stop-name">${stop.emoji} ${stop.city}</div><div class="ov-stop-dates">${stop.start} – ${stop.end}</div><div class="ov-stop-dur">${stop.days>0?stop.days+' night'+(stop.days>1?'s':''):'Transit'}</div></div>`;
+    d.onclick=()=>{ovMap.setView([stop.lat,stop.lng],11,{animate:true});openOv(stop,i);};
+    panel.appendChild(d);
+  });
+}
+function openOv(stop,idx){
+  document.querySelectorAll('.ov-stop').forEach(e=>e.classList.remove('active'));
+  const el=document.getElementById(`ovs-${idx}`);
+  if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  document.getElementById('ovc-emoji').textContent=stop.emoji;
+  document.getElementById('ovc-title').textContent=stop.city;
+  document.getElementById('ovc-sub').textContent=stop.days>0?stop.days+' night'+(stop.days>1?'s':''):'Transit stop';
+  document.getElementById('ovc-dur').textContent=stop.start+' → '+stop.end;
+  document.getElementById('ovc-dates').innerHTML=`<div class="ovc-date-box"><div class="ovc-date-lbl">Arrival</div><div class="ovc-date-val">${stop.start}</div></div><div class="ovc-date-box"><div class="ovc-date-lbl">Departure</div><div class="ovc-date-val">${stop.end}</div></div>`;
+  const tr=document.getElementById('ovc-transport');
+  if(stop.trans){tr.style.display='block';tr.textContent='🚆 Getting here: '+stop.trans+(stop.trans!=='Flight arrival'?' — details to be added':'');}
+  else tr.style.display='none';
+  document.getElementById('ovc-notes').textContent=stop.notes;
+  const ac=document.getElementById('ovc-accom');
+  if(stop.accom){ac.style.display='block';ac.className='ovc-accom booked';ac.textContent='✓ Accommodation booked';}
+  else if(stop.days>0&&stop.city!=='Hanover'){ac.style.display='block';ac.className='ovc-accom tbd';ac.textContent='⚠ Accommodation not yet booked';}
+  else ac.style.display='none';
+  document.getElementById('ov-popup').classList.add('on');
+}
+function closeOv(e,force){
+  if(force||(e&&e.target===document.getElementById('ov-popup'))){
+    document.getElementById('ov-popup').classList.remove('on');
+    document.querySelectorAll('.ov-stop').forEach(el=>el.classList.remove('active'));
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLm(null,true);closeOv(null,true);}});
+
+window.addEventListener('load',()=>{buildItin();initCityMap();});
+</script>
+</body>
+</html>
