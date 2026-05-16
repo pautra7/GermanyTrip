@@ -434,34 +434,13 @@ function buildItin(){
 }
 
 /* ─── PAGE 3 ─── */
-// Simplified Germany border polygon (key points around the border)
-const GERMANY_BORDER = [
-  [47.2701,10.1788],[47.5804,10.4778],[47.6965,10.1769],[47.8310,10.4778],
-  [48.2376,8.1324],[48.6936,7.5827],[49.4639,6.3690],[49.9026,6.1330],
-  [50.1280,5.9947],[50.3264,6.3581],[50.3667,6.8521],[51.0513,6.1164],
-  [51.5035,5.8647],[51.8308,5.9542],[52.2297,7.0261],[53.3301,7.2021],
-  [53.6815,8.5807],[54.8336,8.3936],[54.9088,9.4359],[54.4867,9.9270],
-  [54.8259,10.9370],[54.4546,12.5543],[54.0203,13.9900],[53.9558,14.1504],
-  [53.2436,14.4136],[52.9738,14.1260],[51.8325,14.7193],[51.0513,14.9668],
-  [50.4067,12.0869],[50.2551,12.4805],[49.9659,12.5708],[49.7344,13.0371],
-  [48.9772,13.4250],[48.5570,13.4299],[47.9389,12.7813],[47.5200,13.0054],
-  [47.2701,12.2070],[47.0066,10.4778],[47.2701,10.1788]
-];
 
 function initOvMap(){
   ovMap=L.map('overview-map',{zoomControl:true});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(ovMap);
   ovMap.setView([51.2,10.6],6);
 
-  // Germany border highlight
-  L.polygon(GERMANY_BORDER, {
-    color: '#C8922A',
-    weight: 2.5,
-    opacity: 0.85,
-    fillColor: '#C8922A',
-    fillOpacity: 0.07,
-    dashArray: null
-  }).addTo(ovMap);
+ 
 
   L.polyline(OV_STOPS.map(s=>[s.lat,s.lng]),{color:'#C8922A',weight:2.5,opacity:.65,dashArray:'6 5'}).addTo(ovMap);
   const panel=document.getElementById('ov-stops');
