@@ -4,174 +4,981 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Germany Travel Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Google Fonts: Cause -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cause&display=swap" rel="stylesheet">
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --gold:#C8922A;--gold-light:#FBF0D9;--gold-dark:#7A540F;
-  --dark:#1C1C1C;--charcoal:#2D2D2D;--mid:#666;
-  --bg:#F7F4EF;--white:#fff;--border:#E5DDD0;
-}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
-/* HEADER */
-#header{background:var(--dark);color:#fff;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:2px solid var(--gold);z-index:500}
-#header h1{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;white-space:nowrap}
-#header h1 span{color:var(--gold)}
-#nav{display:flex;gap:4px}
-.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap}
-.nav-btn:hover{border-color:var(--gold);color:var(--gold)}
-.nav-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:600}
+:root {
+  /* Apple-inspired Light Glass Theme */
+  --accent: #0071E3; /* Classic Apple Blue */
+  --accent-light: rgba(0, 113, 227, 0.1);
+  --dark: #1D1D1F;
+  --mid: #86868B;
+  --bg-gradient: #F5F5F7;
+  
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(24px);
+}
+
+body {
+  font-family: 'Cause', sans-serif;
+  background-color: var(--bg-gradient);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(210, 230, 255, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(255, 220, 210, 0.5) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+  color: var(--dark);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER - Liquid Glass */
+#header {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--dark);
+  padding: 0 1.5rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 1px 10px rgba(0,0,0,0.03);
+  z-index: 500;
+}
+#header h1 {
+  font-family: 'Cause', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+#header h1 span {
+  color: var(--accent);
+}
+#nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+#nav::-webkit-scrollbar {display: none;}
+.nav-btn {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: var(--mid);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-family: 'Cause', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--dark);
+  transform: translateY(-1px);
+}
+.nav-btn.active {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
 /* PAGES */
-.page{display:none;flex:1;overflow:hidden}
-.page.active{display:flex}
+.page {display: none; flex: 1; overflow: hidden;}
+.page.active {display: flex;}
 
 /* ═══ PAGE 1 — CITY EXPLORER ═══ */
-#city-tabs-bar{background:var(--dark);padding:0 1.25rem;height:38px;display:flex;align-items:center;gap:4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.08)}
-.city-tab{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);padding:3px 11px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;transition:all .18s}
-.city-tab:hover{border-color:var(--gold);color:var(--gold)}
-.city-tab.active{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:600}
-#explorer-wrap{display:flex;flex:1;overflow:hidden}
-#city-map{flex:1;z-index:1}
-#sidebar{width:295px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-#sb-head{padding:.9rem 1.2rem .7rem;border-bottom:1px solid var(--border)}
-#sb-city{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700}
-#sb-count{font-size:.7rem;color:var(--mid);margin-top:2px}
-#sb-list{flex:1;overflow-y:auto;padding:.4rem 0}
-#sb-list::-webkit-scrollbar{width:3px}
-#sb-list::-webkit-scrollbar-thumb{background:var(--border)}
-.litem{padding:.6rem 1.2rem;cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:9px;transition:background .15s}
-.litem:hover{background:var(--bg);border-left-color:#ddd}
-.litem.active{background:var(--gold-light);border-left-color:var(--gold)}
-.licon{width:30px;height:30px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;border:1px solid var(--border)}
-.litem.active .licon{background:var(--gold-light);border-color:var(--gold)}
-.lname{font-size:.81rem;font-weight:500;color:var(--dark);line-height:1.3}
-.ltype{font-size:.67rem;color:var(--mid);margin-top:1px}
+#city-tabs-bar {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 0 1.5rem;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 499;
+  overflow-x: auto;
+}
+#city-tabs-bar::-webkit-scrollbar {display: none;}
+.city-tab {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
+  color: var(--mid);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: 'Cause', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.city-tab:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--dark);
+}
+.city-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 113, 227, 0.3);
+}
+#explorer-wrap {display: flex; flex: 1; overflow: hidden;}
 
-/* landmark popup */
-#lm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:9000;display:flex;align-items:flex-end;pointer-events:none;opacity:0;transition:opacity .22s}
-#lm-overlay.on{opacity:1;pointer-events:all}
-#lm-card{width:370px;background:var(--white);border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 -6px 32px rgba(0,0,0,.18);transform:translateY(24px);transition:transform .28s cubic-bezier(.34,1.56,.64,1);max-height:86vh;display:flex;flex-direction:column}
-#lm-overlay.on #lm-card{transform:translateY(0)}
-#lm-emoji{height:150px;display:flex;align-items:center;justify-content:center;font-size:3.8rem;background:var(--gold-light);position:relative;flex-shrink:0}
-#lm-close{position:absolute;top:10px;right:10px;width:27px;height:27px;background:rgba(0,0,0,.45);border:none;border-radius:50%;color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#lm-body{padding:1rem 1.25rem 1.4rem;overflow-y:auto}
-#lm-name{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:4px;line-height:1.25}
-#lm-tag{display:inline-block;background:var(--gold-light);color:var(--gold-dark);font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em}
-#lm-rating{font-size:.77rem;color:var(--mid);margin-bottom:.8rem}
-.ftitle{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-dark);margin-bottom:.55rem}
-.fitem{display:flex;gap:8px;margin-bottom:.6rem;align-items:flex-start}
-.fnum{width:19px;height:19px;background:var(--gold);color:var(--dark);border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.ftxt{font-size:.8rem;line-height:1.5;color:#333}
+#map-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+#city-map {
+  flex: 1; 
+  z-index: 1;
+}
+
+#recenter-btn {
+  position: absolute;
+  bottom: 25px;
+  right: 15px;
+  z-index: 1000;
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: var(--dark);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: 'Cause', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#recenter-btn:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+#sidebar {
+  width: 320px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-left: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.03);
+  z-index: 10;
+}
+#sb-head {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.3);
+}
+#sb-city {
+  font-family: 'Cause', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+#sb-count {
+  font-size: 0.95rem;
+  color: var(--mid);
+  margin-top: 4px;
+  font-weight: 500;
+}
+#sb-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+#sb-list::-webkit-scrollbar {width: 4px;}
+#sb-list::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.1); border-radius: 4px;}
+.litem {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.litem:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+.litem.active {
+  background: var(--accent-light);
+  position: relative;
+}
+.litem.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.licon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+}
+.litem.active .licon {
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.15);
+}
+.lname {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark);
+  line-height: 1.3;
+}
+.ltype {
+  font-size: 0.9rem;
+  color: var(--mid);
+  margin-top: 2px;
+}
+
+#lm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#lm-overlay.on {opacity: 1; pointer-events: all;}
+#lm-card {
+  width: 400px;
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+}
+#lm-overlay.on #lm-card {
+  transform: scale(1) translateY(0);
+}
+#lm-banner-container {
+  height: 180px;
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+}
+#lm-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#lm-emoji-badge {
+  position: absolute;
+  bottom: -20px;
+  left: 24px;
+  width: 54px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+#lm-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  color: var(--dark);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  font-family: sans-serif;
+  z-index: 10;
+}
+#lm-close:hover {background: rgba(0, 0, 0, 0.1);}
+#lm-body {
+  padding: 2rem 1.75rem 1.75rem;
+  overflow-y: auto;
+}
+#lm-name {
+  font-family: 'Cause', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+#lm-tag {
+  display: inline-block;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+#lm-rating {font-size: 1rem; color: var(--mid); margin-bottom: 1.2rem;}
+.ftitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dark);
+  margin-bottom: 0.75rem;
+  opacity: 0.6;
+}
+.fitem {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0.85rem;
+  align-items: flex-start;
+  background: rgba(255,255,255,0.4);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+.fnum {
+  width: 22px;
+  height: 22px;
+  background: var(--dark);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ftxt {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--dark);
+}
 
 /* ═══ PAGE 2 — ITINERARY ═══ */
-#itin-inner{flex:1;overflow-y:auto;padding:1.25rem 1.75rem 2rem;background:var(--bg)}
-#itin-inner::-webkit-scrollbar{width:4px}
-#itin-inner::-webkit-scrollbar-thumb{background:var(--border)}
-.itin-header{margin-bottom:1.25rem}
-.itin-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
-.itin-header p{font-size:.8rem;color:var(--mid);margin-top:3px}
-.itin-table{background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.itin-grid{display:grid;grid-template-columns:1.7fr .95fr .95fr .45fr 2.4fr 1.3fr}
-.th{background:var(--dark);color:#fff;font-size:.69rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:.55rem .8rem;border-right:1px solid rgba(255,255,255,.1)}
-.th:last-child{border-right:none}
-.tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.tr:hover{background:var(--gold-light)}
-.tr:last-child{border-bottom:none}
-.td{padding:.68rem .8rem;font-size:.81rem;color:var(--dark);border-right:1px solid var(--border);align-self:stretch;display:flex;align-items:center}
-.td:last-child{border-right:none}
-.city-col{font-weight:600;gap:7px}
-.note-col{font-size:.73rem;color:var(--mid);line-height:1.4;flex-direction:column;align-items:flex-start;justify-content:center}
-.train-hint{margin-top:4px;font-size:.69rem;color:#1A4F8A;font-style:italic}
-.dur-col{font-weight:600}
-.badge{display:inline-block;font-size:.66rem;font-weight:600;padding:2px 7px;border-radius:9px;margin:2px 2px 2px 0}
-.b-done{background:#E3F5E3;color:#2A7A2A}
-.b-train{background:#E6EFF9;color:#1A4F8A}
-.b-tbd{background:#FFF3CD;color:#856404}
-.tfoot{background:var(--dark);display:grid;grid-template-columns:1.7fr .95fr .95fr .45fr 2.4fr 1.3fr}
-.tfoot .td{color:#fff;font-weight:600;border-right:1px solid rgba(255,255,255,.12)}
-.tfoot .td:last-child{border-right:none}
+#itin-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+#itin-inner::-webkit-scrollbar {width: 6px;}
+#itin-inner::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.1); border-radius: 6px;}
+.itin-header {margin-bottom: 1.5rem; text-align: center;}
+.itin-header h2 {
+  font-family: 'Cause', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.itin-header p {
+  font-size: 1.1rem;
+  color: var(--mid);
+  margin-top: 6px;
+  font-weight: 500;
+}
+.itin-table {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.itin-grid {display: grid; grid-template-columns: 1.7fr 0.95fr 0.95fr 0.45fr 2.4fr 1.3fr;}
+.th {
+  background: rgba(255,255,255,0.5);
+  color: var(--dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  border-right: 1px solid rgba(255,255,255,0.3);
+}
+.th:last-child {border-right: none;}
+.tr {
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.tr:hover {background: rgba(255,255,255,0.6);}
+.tr:last-child {border-bottom: none;}
+.td {
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  color: var(--dark);
+  border-right: 1px solid rgba(0,0,0,0.04);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+.td:last-child {border-right: none;}
+.city-col {font-weight: 600; gap: 10px; font-size: 1.1rem;}
+.note-col {
+  font-size: 1rem;
+  color: var(--mid);
+  line-height: 1.4;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.train-hint {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.dur-col {font-weight: 600;}
+.badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin: 2px 2px 2px 0;
+  border: 1px solid rgba(255,255,255,0.5);
+  font-family: 'Cause', sans-serif;
+}
+.b-done {background: rgba(52, 199, 89, 0.15); color: #248A3D;}
+.b-train {background: rgba(0, 113, 227, 0.15); color: var(--accent);}
+.b-tbd {background: rgba(255, 149, 0, 0.15); color: #B26800;}
+.tfoot {
+  background: rgba(0,0,0,0.03);
+  display: grid;
+  grid-template-columns: 1.7fr 0.95fr 0.95fr 0.45fr 2.4fr 1.3fr;
+  border-top: 1px solid var(--glass-border);
+}
+.tfoot .td {
+  color: var(--dark);
+  font-weight: 700;
+  border-right: 1px solid rgba(0,0,0,0.04);
+}
 
 /* ═══ PAGE 3 — OVERVIEW MAP ═══ */
-#overview-wrap{display:flex;flex:1;overflow:hidden}
-#overview-map{flex:1;z-index:1}
-#ov-panel{width:270px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-#ov-head{padding:.85rem 1.1rem .65rem;border-bottom:1px solid var(--border)}
-#ov-head h2{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700}
-#ov-head p{font-size:.7rem;color:var(--mid);margin-top:2px}
-#ov-stops{flex:1;overflow-y:auto;padding:.4rem 0}
-#ov-stops::-webkit-scrollbar{width:3px}
-#ov-stops::-webkit-scrollbar-thumb{background:var(--border)}
-.ov-stop{padding:.6rem 1.1rem;cursor:pointer;border-left:3px solid transparent;transition:background .15s;display:flex;align-items:center;gap:9px}
-.ov-stop:hover{background:var(--bg)}
-.ov-stop.active{background:var(--gold-light);border-left-color:var(--gold)}
-.snum{width:22px;height:22px;background:var(--gold);color:var(--dark);border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ov-stop-name{font-size:.83rem;font-weight:600;color:var(--dark)}
-.ov-stop-dates{font-size:.7rem;color:var(--mid);margin-top:1px}
-.ov-stop-dur{font-size:.68rem;color:var(--gold-dark);font-weight:500;margin-top:2px}
+#overview-wrap {display: flex; flex: 1; overflow: hidden;}
+#overview-map {flex: 1; z-index: 1;}
+#ov-panel {
+  width: 320px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-left: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.03);
+  z-index: 10;
+}
+#ov-head {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.3);
+}
+#ov-head h2 {
+  font-family: 'Cause', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+#ov-head p {font-size: 0.95rem; color: var(--mid); margin-top: 4px; font-weight: 500;}
+#ov-stops {flex: 1; overflow-y: auto; padding: 0.5rem 0;}
+#ov-stops::-webkit-scrollbar {width: 4px;}
+#ov-stops::-webkit-scrollbar-thumb {background: rgba(0,0,0,0.1); border-radius: 4px;}
+.ov-stop {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.ov-stop:hover {background: rgba(255, 255, 255, 0.6);}
+.ov-stop.active {
+  background: var(--accent-light);
+  position: relative;
+}
+.ov-stop.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.snum {
+  width: 26px;
+  height: 26px;
+  background: var(--dark);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.ov-stop-name {font-size: 1.1rem; font-weight: 600; color: var(--dark);}
+.ov-stop-dates {font-size: 0.95rem; color: var(--mid); margin-top: 2px;}
+.ov-stop-dur {font-size: 0.9rem; color: var(--accent); font-weight: 600; margin-top: 2px;}
 
-/* overview popup */
-#ov-popup{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .2s}
-#ov-popup.on{opacity:1;pointer-events:all}
-#ov-card{background:var(--white);border-radius:14px;padding:1.4rem;width:330px;box-shadow:0 8px 40px rgba(0,0,0,.18);transform:scale(.95);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
-#ov-popup.on #ov-card{transform:scale(1)}
-.ovc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.9rem}
-.ovc-emoji{font-size:2rem;margin-right:.65rem}
-.ovc-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;line-height:1.2}
-.ovc-sub{font-size:.73rem;color:var(--mid);margin-top:3px}
-#ovc-close{background:none;border:none;font-size:1.05rem;cursor:pointer;color:var(--mid);padding:2px 5px}
-.ovc-dates{display:flex;gap:.65rem;margin-bottom:.85rem}
-.ovc-date-box{flex:1;background:var(--bg);border-radius:7px;padding:.55rem .7rem;border:1px solid var(--border)}
-.ovc-date-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);font-weight:600}
-.ovc-date-val{font-size:.85rem;font-weight:600;color:var(--dark);margin-top:2px}
-.ovc-dur{display:inline-block;background:var(--gold-light);color:var(--gold-dark);font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:11px;margin-bottom:.85rem}
-.ovc-transport{font-size:.76rem;color:#1A4F8A;background:#E6EFF9;padding:.45rem .7rem;border-radius:6px;margin-bottom:.7rem}
-.ovc-notes{font-size:.77rem;color:var(--mid);line-height:1.5}
-.ovc-accom{font-size:.73rem;padding:.4rem .7rem;border-radius:6px;margin-top:.55rem}
-.ovc-accom.booked{background:#E3F5E3;color:#2A7A2A}
-.ovc-accom.tbd{background:#FFF3CD;color:#856404}
+#ov-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#ov-popup.on {opacity: 1; pointer-events: all;}
+#ov-card {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  width: 380px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+}
+#ov-popup.on #ov-card {transform: scale(1) translateY(0);}
+#ov-banner-container {
+  height: 160px;
+  width: 100%;
+  position: relative;
+  flex-shrink: 0;
+}
+#ov-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#ovc-emoji-badge {
+  position: absolute;
+  bottom: -22px;
+  left: 24px;
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+#ovc-close {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  font-family: sans-serif;
+  position: absolute;
+  top: 16px; right: 16px;
+  z-index: 10;
+}
+#ovc-close:hover {background: rgba(0, 0, 0, 0.1);}
+#ov-scroll-body {
+  padding: 2.2rem 1.75rem 1.75rem;
+  overflow-y: auto;
+}
+.ovc-top {display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.2rem;}
+.ovc-title {font-family: 'Cause', sans-serif; font-size: 1.6rem; font-weight: 700; line-height: 1.2;}
+.ovc-sub {font-size: 1rem; color: var(--mid); margin-top: 4px; font-weight: 500;}
+.ovc-dates {display: flex; gap: 10px; margin-bottom: 1rem;}
+.ovc-date-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.8);
+}
+.ovc-date-lbl {font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid); font-weight: 700;}
+.ovc-date-val {font-size: 1.1rem; font-weight: 600; color: var(--dark); margin-top: 4px;}
+.ovc-dur {
+  display: inline-block;
+  background: var(--dark);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+.ovc-transport {
+  font-size: 1rem;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  margin-bottom: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+.ovc-notes {
+  font-size: 1.05rem;
+  color: var(--dark);
+  line-height: 1.5;
+  background: rgba(255,255,255,0.3);
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.ovc-accom {
+  font-size: 1rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  margin-top: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+.ovc-accom.booked {background: rgba(52, 199, 89, 0.15); color: #248A3D;}
+.ovc-accom.tbd {background: rgba(255, 149, 0, 0.15); color: #B26800;}
+
+
+/* ═══ PAGE 4 — CLOUD PORTAL ═══ */
+#gallery-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+.upload-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: var(--glass-shadow);
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.upload-card h3 {
+  font-family: 'Cause', sans-serif;
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+.upload-card p {
+  font-size: 1.1rem;
+  color: var(--mid);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+.portal-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 16px;
+  font-family: 'Cause', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 113, 227, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.portal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 113, 227, 0.4);
+  background: #0062C2;
+}
+
+/* ═══ PAGE 5 — JOURNAL ═══ */
+#journal-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1500px;
+  overflow: hidden;
+  padding: 2rem;
+}
+#journal-book {
+  position: relative;
+  width: 400px; /* Width of one page */
+  height: 550px;
+  max-width: 90vw;
+  max-height: 75vh;
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+@media (min-width: 701px) {
+  #journal-book.open {
+    transform: translateX(50%); /* Centers the open book (spine hits middle of screen) */
+  }
+}
+.paper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+  cursor: pointer;
+}
+.paper.flipped {
+  transform: rotateY(-180deg);
+}
+.paper-front, .paper-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 4px 16px 16px 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1), inset 1px 0 0 rgba(255,255,255,0.5);
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+.paper-back {
+  transform: rotateY(180deg);
+  border-radius: 16px 4px 4px 16px;
+}
+
+/* Cover Styling */
+.cover-front {
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 12px solid #005bb5;
+  text-align: center;
+  padding: 2rem;
+}
+.cover-front h2 {
+  font-size: 2.8rem;
+  font-family: 'Cause', sans-serif;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+.cover-front p {
+  font-size: 1.2rem;
+  opacity: 0.85;
+  margin-bottom: 2.5rem;
+}
+.cover-hint {
+  background: rgba(255,255,255,0.2);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.cover-back {
+  background: #005bb5;
+  border-right: 12px solid var(--accent);
+}
+
+/* Inside Page Content Styling */
+.page-content {
+  padding: 2.5rem 2rem;
+  height: 100%;
+  overflow-y: auto;
+}
+.page-content::-webkit-scrollbar { width: 4px; }
+.page-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.j-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 1rem;
+  font-family: 'Cause', sans-serif;
+  line-height: 1.2;
+}
+.j-date {
+  font-size: 0.9rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.j-text {
+  font-size: 1.05rem;
+  color: var(--dark);
+  line-height: 1.6;
+  white-space: pre-wrap; /* Allows uploaded text to maintain its natural line breaks */
+  opacity: 0.85;
+}
+
 
 /* ═══ MOBILE RESPONSIVE ═══ */
 @media (max-width: 700px) {
-  /* Header: shrink nav text */
-  #header{padding:0 .75rem}
-  #header h1{font-size:.9rem}
-  .nav-btn{padding:4px 8px;font-size:.68rem}
+  #header {padding: 0 1rem; height: 54px;}
+  #header h1 {font-size: 1.2rem;}
+  .nav-btn {padding: 5px 12px; font-size: 0.95rem;}
 
-  /* Body scrollable on mobile */
-  body{height:100dvh;overflow:hidden}
+  body {height: 100dvh; overflow: hidden;}
+  .page.active {flex-direction: column !important;}
 
-  /* Pages: column layout on mobile */
-  .page.active{flex-direction:column !important}
+  #city-tabs-bar {padding: 0 1rem; gap: 6px; height: 54px;}
+  
+  #explorer-wrap {flex-direction: column; overflow: hidden;}
+  #map-container {flex: none; height: 40vh; width: 100%; z-index: 1;}
+  
+  #sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--glass-border);
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.05);
+  }
 
-  /* City explorer: map on top, sidebar below & scrollable */
-  #city-tabs-bar{overflow-x:auto;padding:0 .75rem;gap:3px}
-  #city-tabs-bar::-webkit-scrollbar{display:none}
-  #explorer-wrap{flex-direction:column;overflow:hidden}
-  #city-map{flex:none;height:45vh;width:100%;z-index:1}
-  #sidebar{width:100%;border-left:none;border-top:1px solid var(--border);flex:1;overflow:hidden;min-height:0}
-  #sb-list{flex:1;overflow-y:auto}
+  #lm-card, #ov-card {
+    width: 90%;
+    border-radius: 24px;
+    max-height: 80vh;
+  }
 
-  /* Landmark popup: full width on mobile */
-  #lm-card{width:100%;border-radius:16px 16px 0 0;max-height:75vh}
+  #itin-inner {padding: 1rem 1rem 2rem;}
+  .itin-table {overflow-x: auto; border-radius: 16px;}
+  .itin-grid, .tfoot {grid-template-columns: 140px 90px 90px 50px 200px 120px; min-width: 690px;}
+  .th, .td {padding: 0.75rem 0.8rem; font-size: 1rem;}
 
-  /* Itinerary: horizontally scrollable table */
-  #itin-inner{padding:.75rem .75rem 1.5rem}
-  .itin-table{overflow-x:auto}
-  .itin-grid,.tfoot{grid-template-columns:130px 80px 80px 40px 180px 110px;min-width:620px}
-  .th,.td{padding:.5rem .55rem;font-size:.72rem}
+  #overview-wrap {flex-direction: column; overflow: hidden;}
+  #overview-map {flex: none; height: 40vh; width: 100%; z-index: 1;}
+  
+  #ov-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--glass-border);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.05);
+  }
+  #ov-stops {flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;}
 
-  /* Overview: map on top, stop list below & scrollable */
-  #overview-wrap{flex-direction:column;overflow:hidden}
-  #overview-map{flex:none;height:45vh;width:100%;z-index:1}
-  #ov-panel{width:100%;border-left:none;border-top:1px solid var(--border);flex:1;min-height:0;overflow:hidden}
-  #ov-stops{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-
-  /* Overview popup: full width on mobile */
-  #ov-card{width:calc(100vw - 2rem);max-height:80vh;overflow-y:auto}
+  .upload-card {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  /* Mobile book fix */
+  #journal-book { width: 45vw; max-width: none; }
+  #journal-book.open { transform: translateX(50%); } 
+  .page-content { padding: 1.5rem 1rem; }
+  .cover-front h2 { font-size: 1.8rem; }
 }
 </style>
 </head>
@@ -183,6 +990,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);hei
     <button class="nav-btn active" onclick="showPage('explorer')">🗺 City Explorer</button>
     <button class="nav-btn" onclick="showPage('itinerary')">📋 Itinerary</button>
     <button class="nav-btn" onclick="showPage('overview')">🇩🇪 Trip Overview</button>
+    <button class="nav-btn" onclick="showPage('gallery')">📸 Trip Gallery</button>
+    <button class="nav-btn" onclick="showPage('journal')">📖 Journal</button>
   </div>
 </div>
 
@@ -197,7 +1006,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);hei
     <button class="city-tab" data-city="Münster" onclick="renderCity('Münster')">Münster</button>
   </div>
   <div id="explorer-wrap">
-    <div id="city-map"></div>
+    <div id="map-container">
+      <div id="city-map"></div>
+      <button id="recenter-btn" onclick="recenterCityMap()">⌖ Recenter</button>
+    </div>
     <div id="sidebar">
       <div id="sb-head"><div id="sb-city">Munich</div><div id="sb-count"></div></div>
       <div id="sb-list"></div>
@@ -245,10 +1057,101 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);hei
   </div>
 </div>
 
+<!-- PAGE 4 -->
+<div id="page-gallery" class="page" style="flex-direction:column;overflow:hidden">
+  <div id="gallery-container">
+    <div class="upload-card">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">☁️</div>
+      <h3>Trip Photo Stream</h3>
+      <p>
+        To keep things seamless and secure for everyone on the trip, all photos are synced via a Shared Cloud Album at full resolution. 
+      </p>
+      
+      <!-- PASTE YOUR GOOGLE PHOTOS OR iCLOUD LINK HERE -->
+      <a href="https://www.icloud.com/sharedalbum/#B26GWZuqD8mKIwD" target="_blank" style="text-decoration: none; width: 100%;">
+        <button class="portal-btn">
+          <span>Open Shared Gallery</span>
+          <span style="font-size: 1.3rem;">↗</span>
+        </button>
+      </a>
+      
+      <p style="font-size: 0.85rem; color: var(--mid); margin-top: 24px; line-height: 1.5; background: rgba(255,255,255,0.4); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
+        <strong>How it works:</strong> Clicking the button above will seamlessly open the native Apple Photos or Google Photos app on your device, allowing you to instantly view and upload images to the group folder.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5 (NEW JOURNAL PAGE) -->
+<div id="page-journal" class="page" style="flex-direction:column;overflow:hidden">
+  <div id="journal-wrap">
+    <div id="journal-book">
+      
+      <!-- Page 1 (Cover) -->
+      <div class="paper" onclick="flipPaper(this, 0)">
+        <div class="paper-front cover-front">
+          <h2>Germany Trip</h2>
+          <p>2026 Travel Journal</p>
+          <div class="cover-hint">Tap to open ➝</div>
+        </div>
+        <div class="paper-back cover-back"></div>
+      </div>
+      
+      <!-- Page 2 -->
+      <div class="paper" onclick="flipPaper(this, 1)">
+        <div class="paper-front">
+          <div class="page-content">
+            <div class="j-date">May 20, 2026</div>
+            <div class="j-title">Arrival in Munich</div>
+            <!-- INSERT TEXT HERE -->
+            <div class="j-text">We finally landed in Munich this morning! After settling into the accommodation, we headed straight to the Viktualienmarkt for some traditional Bavarian food. 
+
+The weather is absolutely perfect. The Glockenspiel performance at noon was a great introduction to the city's charm. Tomorrow we plan to rent bikes and explore the English Garden.</div>
+          </div>
+        </div>
+        <div class="paper-back">
+          <div class="page-content">
+            <div class="j-date">May 23, 2026</div>
+            <div class="j-title">Train to Würzburg</div>
+            <!-- INSERT TEXT HERE -->
+            <div class="j-text">Saying goodbye to Munich today. We took the afternoon train to Würzburg. 
+
+The scenery along the way was beautiful. Würzburg feels so different, surrounded by vineyards. The Alte Mainbrücke is incredible at sunset—everyone gathers there with a glass of local Franconian wine. Can't wait to see the Residenz tomorrow.</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Page 3 -->
+      <div class="paper" onclick="flipPaper(this, 2)">
+        <div class="paper-front">
+          <div class="page-content">
+            <div class="j-date">Upload Entry</div>
+            <div class="j-title">Add your thoughts</div>
+            <div class="j-text" style="color: var(--dark); font-weight: 500;">You can upload more journal entries directly into the code here. Just copy a page block and add your text!</div>
+          </div>
+        </div>
+        <div class="paper-back">
+          <div class="page-content" style="display:flex; align-items:center; justify-content:center; text-align:center;">
+            <div style="opacity:0.3;">
+              <div style="font-size:3rem; margin-bottom:1rem;">🏁</div>
+              <div class="j-title">End of Journal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
 <!-- landmark popup -->
 <div id="lm-overlay" onclick="closeLm(event)">
   <div id="lm-card">
-    <div id="lm-emoji"><button id="lm-close" onclick="closeLm(null,true)">✕</button><span id="lm-ech"></span></div>
+    <div id="lm-banner-container">
+      <button id="lm-close" onclick="closeLm(null,true)">✕</button>
+      <img id="lm-img" src="" alt="Landmark Image cover">
+      <div id="lm-emoji-badge"></div>
+    </div>
     <div id="lm-body">
       <div id="lm-name"></div><div id="lm-tag"></div><div id="lm-rating"></div>
       <div class="ftitle">3 things to know</div>
@@ -260,49 +1163,53 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);hei
 <!-- overview popup -->
 <div id="ov-popup" onclick="closeOv(event)">
   <div id="ov-card">
-    <div class="ovc-top">
-      <div style="display:flex;align-items:center">
-        <span class="ovc-emoji" id="ovc-emoji"></span>
+    <div id="ov-banner-container">
+      <button id="ovc-close" onclick="closeOv(null,true)">✕</button>
+      <img id="ov-img" src="" alt="City Image cover">
+      <div id="ovc-emoji-badge"></div>
+    </div>
+    <div id="ov-scroll-body">
+      <div class="ovc-top">
         <div><div class="ovc-title" id="ovc-title"></div><div class="ovc-sub" id="ovc-sub"></div></div>
       </div>
-      <button id="ovc-close" onclick="closeOv(null,true)">✕</button>
+      <div class="ovc-dates" id="ovc-dates"></div>
+      <div class="ovc-dur" id="ovc-dur"></div>
+      <div id="ovc-transport" class="ovc-transport" style="display:none"></div>
+      <div class="ovc-notes" id="ovc-notes"></div>
+      <div id="ovc-accom" class="ovc-accom" style="display:none"></div>
     </div>
-    <div class="ovc-dates" id="ovc-dates"></div>
-    <div class="ovc-dur" id="ovc-dur"></div>
-    <div id="ovc-transport" class="ovc-transport" style="display:none"></div>
-    <div class="ovc-notes" id="ovc-notes"></div>
-    <div id="ovc-accom" class="ovc-accom" style="display:none"></div>
   </div>
 </div>
 
 <script>
 const ITIN=[
-  {city:'Departure',    emoji:'✈️', start:'5/19/2026',end:'5/20/2026',days:1, notes:'Land in the morning in Munich',                          accom:'',     trans:''},
-  {city:'Munich',       emoji:'🏙️', start:'5/20/2026',end:'5/23/2026',days:3, notes:'Arrive in the morning; Leave in the afternoon',          accom:'Done', trans:''},
-  {city:'Würzburg',     emoji:'🏰', start:'5/23/2026',end:'5/25/2026',days:2, notes:'Arrive in the evening; Leave in the afternoon',          accom:'Done', trans:'Train'},
-  {city:'Dresden',      emoji:'⛪', start:'5/25/2026',end:'5/28/2026',days:3, notes:'Arrive in the evening; Leave in morning',                accom:'',     trans:'Train'},
-  {city:'Leipzig',      emoji:'🗿', start:'5/28/2026',end:'5/31/2026',days:3, notes:'Arrive in the morning; Leave in the morning',            accom:'Done', trans:'Train'},
-  {city:'Berlin',       emoji:'🏛️', start:'5/31/2026',end:'6/3/2026', days:3, notes:'Arrive in the morning; Leave in the morning',            accom:'',     trans:'Train'},
-  {city:'Münster',      emoji:'🕌', start:'6/3/2026', end:'6/6/2026', days:3, notes:'Arrive in the afternoon; Leave in the morning',          accom:'Done', trans:'Train'},
-  {city:'Helmstedt',    emoji:'🌿', start:'6/6/2026', end:'6/7/2026', days:1, notes:'Arrive in the afternoon; Leave in the afternoon',        accom:'',     trans:''},
-  {city:'Braunschweig', emoji:'🏯', start:'6/7/2026', end:'6/9/2026', days:2, notes:'Arrive in the afternoon; Leave in the morning',          accom:'Done', trans:''},
-  {city:'Hanover',      emoji:'🚉', start:'6/9/2026', end:'6/9/2026', days:0, notes:'Travel Home',                                            accom:'',     trans:''},
+  {city:'Departure',    emoji:'✈️', start:'5/19/2026',end:'5/20/2026',days:1, notes:'Land in the morning in Munich',                         accom:'',     trans:''},
+  {city:'Munich',       emoji:'🏙️', start:'5/20/2026',end:'5/23/2026',days:3, notes:'Arrive in the morning; Leave in the afternoon',         accom:'Done', trans:''},
+  {city:'Würzburg',     emoji:'🏰', start:'5/23/2026',end:'5/25/2026',days:2, notes:'Arrive in the evening; Leave in the afternoon',         accom:'Done', trans:'Train'},
+  {city:'Dresden',      emoji:'⛪', start:'5/25/2026',end:'5/28/2026',days:3, notes:'Arrive in the evening; Leave in morning',               accom:'',     trans:'Train'},
+  {city:'Leipzig',      emoji:'🗿', start:'5/28/2026',end:'5/31/2026',days:3, notes:'Arrive in the morning; Leave in the morning',           accom:'Done', trans:'Train'},
+  {city:'Berlin',       emoji:'🏛️', start:'5/31/2026',end:'6/3/2026', days:3, notes:'Arrive in the morning; Leave in the morning',           accom:'',     trans:'Train'},
+  {city:'Münster',      emoji:'🕌', start:'6/3/2026', end:'6/6/2026', days:3, notes:'Arrive in the afternoon; Leave in the morning',         accom:'Done', trans:'Train'},
+  {city:'Helmstedt',    emoji:'🌿', start:'6/6/2026', end:'6/7/2026', days:1, notes:'Arrive in the afternoon; Leave in the afternoon',       accom:'',     trans:''},
+  {city:'Braunschweig', emoji:'🏯', start:'6/7/2026', end:'6/9/2026', days:2, notes:'Arrive in the afternoon; Leave in the morning',         accom:'Done', trans:''},
+  {city:'Hanover',      emoji:'🚉', start:'6/9/2026', end:'6/9/2026', days:0, notes:'Travel Home',                                           accom:'',     trans:''},
 ];
 
+
 const OV_STOPS=[
-  {city:'Munich',       emoji:'🏙️',lat:48.1374,lng:11.5755,start:'May 20',end:'May 23',days:3,trans:'Flight arrival',accom:'Done', notes:'Arrive in the morning; leave in the afternoon. 3 full days to explore.'},
-  {city:'Würzburg',     emoji:'🏰',lat:49.7927,lng:9.9391, start:'May 23',end:'May 25',days:2,trans:'Train',        accom:'Done', notes:'Arrive in the evening; leave in the afternoon.'},
-  {city:'Dresden',      emoji:'⛪',lat:51.0519,lng:13.7415,start:'May 25',end:'May 28',days:3,trans:'Train',        accom:'',     notes:'Arrive in the evening; leave in the morning.'},
-  {city:'Leipzig',      emoji:'🗿',lat:51.3406,lng:12.3747,start:'May 28',end:'May 31',days:3,trans:'Train',        accom:'Done', notes:'Arrive in the morning; leave in the morning.'},
-  {city:'Berlin',       emoji:'🏛️',lat:52.5163,lng:13.3777,start:'May 31',end:'Jun 3', days:3,trans:'Train',        accom:'',     notes:'Arrive in the morning; leave in the morning.'},
-  {city:'Münster',      emoji:'🕌',lat:51.9622,lng:7.6282, start:'Jun 3', end:'Jun 6', days:3,trans:'Train',        accom:'Done', notes:'Arrive in the afternoon; leave in the morning.'},
-  {city:'Helmstedt',    emoji:'🌿',lat:52.2284,lng:11.0101,start:'Jun 6', end:'Jun 7', days:1,trans:'TBD',          accom:'',     notes:'Arrive in the afternoon; leave in the afternoon.'},
-  {city:'Braunschweig', emoji:'🏯',lat:52.2689,lng:10.5268,start:'Jun 7', end:'Jun 9', days:2,trans:'TBD',          accom:'Done', notes:'Arrive in the afternoon; leave in the morning.'},
-  {city:'Hanover',      emoji:'🚉',lat:52.3759,lng:9.7320, start:'Jun 9', end:'Jun 9', days:0,trans:'',             accom:'',     notes:'Departure point — fly home from Hanover.'},
+  {city:'Munich',       emoji:'🏙️',lat:48.1374,lng:11.5755,start:'May 20',end:'May 23',days:3,trans:'Flight arrival',accom:'Done', notes:'Arrive in the morning; leave in the afternoon. 3 full days to explore.', image: 'https://d3dqioy2sca31t.cloudfront.net/Projects/cms/production/000/031/412/original/68ede37d1f8a8b046c975f6cd18ebbce/article-germany-munich-new-town-hall.jpg?auto=format&fit=crop&w=600&q=80'},
+  {city:'Würzburg',     emoji:'🏰',lat:49.7927,lng:9.9391, start:'May 23',end:'May 25',days:2,trans:'Train',        accom:'Done', notes:'Arrive in the evening; leave in the afternoon.', image: 'https://d3dqioy2sca31t.cloudfront.net/Projects/cms/production/000/002/098/slideshow/f9c58df7f0d0416b44a3d78e3625a5b4/germany-wurzburg-kiliansdom.jpg?auto=format&fit=crop&w=600&q=80'},
+  {city:'Dresden',      emoji:'⛪',lat:51.0519,lng:13.7415,start:'May 25',end:'May 28',days:3,trans:'Train',        accom:'',     notes:'Arrive in the evening; leave in the morning.', image: 'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTabXj8C8q2mwCvMBlpKgVf0DsJhCxys6y2DwW5Thh74krea8ZzS5o7i7FGTZrJsK4w884bUAFMybVpP0rhM5pVVtA&s=19?auto=format&fit=crop&w=600&q=80'},
+  {city:'Leipzig',      emoji:'🗿',lat:51.3406,lng:12.3747,start:'May 28',end:'May 31',days:3,trans:'Train',        accom:'Done', notes:'Arrive in the morning; leave in the morning.', image: 'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTgBTwOjybiE-8Ajjn7HrnQe085jdhrVM7Ec0_U5zuOOGm7KtMtmaMIGLoIXsIcrlatTIaRpGFlTs6B9u7yRycnFUQH&s=19?auto=format&fit=crop&w=600&q=80'},
+  {city:'Berlin',       emoji:'🏛️',lat:52.5163,lng:13.3777,start:'May 31',end:'Jun 3', days:3,trans:'Train',        accom:'',     notes:'Arrive in the morning; leave in the morning.', image: 'https://media.cntraveler.com/photos/5b914e80d5806340ca438db1/master/pass/BrandenburgGate_2018_GettyImages-549093677.jpg?auto=format&fit=crop&w=600&q=80'},
+  {city:'Münster',      emoji:'🕌',lat:51.9622,lng:7.6282, start:'Jun 3', end:'Jun 6', days:3,trans:'Train',        accom:'Done', notes:'Arrive in the afternoon; leave in the morning.', image: 'https://www.germany.travel/media/redaktion/staedte_kultur_content/muenster/Muenster_Lambertibrunnen_auf_dem_Prinzipalmarkt_Spiegelung_der_alten_Haeuserbei_Nacht.jpg?auto=format&fit=crop&w=600&q=80'},
+  {city:'Helmstedt',    emoji:'🌿',lat:52.2284,lng:11.0101,start:'Jun 6', end:'Jun 7', days:1,trans:'TBD',          accom:'',     notes:'Arrive in the afternoon; leave in the afternoon.', image: 'https://upload.wikimedia.org/wikipedia/commons/5/52/Juleum_Helmstedt.jpg?auto=format&fit=crop&w=600&q=80'},
+  {city:'Braunschweig', emoji:'🏯',lat:52.2689,lng:10.5268,start:'Jun 7', end:'Jun 9', days:2,trans:'TBD',          accom:'Done', notes:'Arrive in the afternoon; leave in the morning.', image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAHAoXPtMBSnqRD04wIlR6BoDVVl5yTBmCibT77ImbpU47l8iAz_WJSVrpkRLVbKa9yd68GDnmKrrMj_q7gqWZER-Zgg92HrqNGJnBv5qYdf3fBvednSDqTxc3jPg2efyIiXTnUdRQ=w1080-h624-n-k-no?auto=format&fit=crop&w=600&q=80'},
+  {city:'Hanover',      emoji:'🚉',lat:52.3759,lng:9.7320, start:'Jun 9', end:'Jun 9', days:0,trans:'',             accom:'',     notes:'Departure point — fly home from Hanover.', image: 'https://images.unsplash.com/photo-1571945153237-4929e78394af?auto=format&fit=crop&w=600&q=80'},
 ];
 
 const CITIES={
-  Munich:{center:[48.1374,11.5755],zoom:13,landmarks:[
+  Munich:{center:[48.1374,11.5755],zoom:13,image:'https://images.unsplash.com/photo-1595853035070-59a39fe84de3?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"St. Peter's Tower",emoji:"⛪",type:"Tower / Panorama",lat:48.1366805,lng:11.5756044,rating:4.7,facts:["Climb 306 steps for the best 360° panoramic view of Munich's old town and the Alps — tickets are just €5.","Munich's oldest parish church, with parts dating to the 14th century blending Gothic and Baroque styles.","Offers a rare aerial perspective directly over Marienplatz — arrive early on clear days for Alps views."]},
     {name:"Rathaus-Glockenspiel",emoji:"🕰️",type:"Clock / Landmark",lat:48.1374724,lng:11.5754855,rating:4.7,facts:["Performs daily at 11am and 12pm with 43 bells and 32 life-sized figures re-enacting Bavarian historical scenes.","The neo-Gothic New Town Hall housing it took over 40 years to build (1867–1909).","The show depicts Duke Wilhelm V's 1568 wedding and the Schäfflertanz dance celebrating the end of a plague."]},
     {name:"Munich Residenz",emoji:"🏰",type:"Palace / Museum",lat:48.1417978,lng:11.579486,rating:4.6,facts:["Germany's largest city palace with over 130 rooms — home to the Wittelsbach dynasty for 400 years.","The Treasury holds the gem-encrusted Statue of St. George, one of the world's greatest royal treasures.","Plan 2–3 hours minimum; the complex also includes the beautiful Hofgarten court garden."]},
@@ -313,14 +1220,14 @@ const CITIES={
     {name:"Nymphenburg Palace",emoji:"🏯",type:"Palace & Gardens",lat:48.1582675,lng:11.5033143,rating:4.6,facts:["Built in 1664 as a summer residence, the palace facade stretches an extraordinary 632 meters wide.","Home to the 'Gallery of Beauties' — 36 portraits commissioned by King Ludwig I.","The surrounding park is free to stroll and covers 200 hectares with canals, fountains, and pavilions."]},
     {name:"Augustiner-Keller",emoji:"🍺",type:"Beer Garden",lat:48.1433523,lng:11.5519791,rating:4.4,facts:["One of Munich's oldest beer gardens, dating to 1812, seating up to 5,000 guests under chestnut trees.","Serves Augustiner beer from rare wooden barrels — a tradition almost extinct even in Bavaria.","Expect hearty Bavarian food, traditional decor, and an irresistibly lively atmosphere."]}
   ]},
-  'Würzburg':{center:[49.791,9.929],zoom:14,landmarks:[
+  'Würzburg':{center:[49.791,9.929],zoom:14,image:'https://images.unsplash.com/photo-1627566277156-f5424cfbf03b?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"Würzburg Residenz",emoji:"🏛️",type:"UNESCO Palace",lat:49.7927423,lng:9.9391185,rating:4.7,facts:["A UNESCO World Heritage Site — one of Europe's finest Baroque palaces, designed by Balthasar Neumann.","Contains the world's largest ceiling fresco (677 m²) by Tiepolo in the Grand Staircase hall.","Free English guided tours available — check timing in advance as English sessions are limited."]},
     {name:"Alte Mainbrücke",emoji:"🌉",type:"Historic Bridge",lat:49.7929931,lng:9.9261044,rating:4.7,facts:["Built in the 15th century — one of Germany's oldest stone bridges, lined with 12 Baroque sandstone statues.","Often compared to Prague's Charles Bridge — equally beautiful and much less crowded.","Local tradition: enjoy a glass of Franconian wine directly on the bridge at sunset."]},
     {name:"St. Kilian's Cathedral",emoji:"⛪",type:"Cathedral",lat:49.7934348,lng:9.9319943,rating:4.6,facts:["One of Germany's great Romanesque cathedrals, with origins stretching to the 11th century.","Almost entirely destroyed in Allied bombing in March 1945 — the restored interior blends old and new powerfully.","Dedicated to St. Kilian, the Irish missionary who brought Christianity to Franconia in the 7th century."]},
     {name:"Marienberg Fortress",emoji:"🏰",type:"Fortress / Museum",lat:49.7897393,lng:9.9201319,rating:4.6,facts:["Perched above the Main River since the 13th century, offering panoramic views over the city.","The vineyard walk up from the Alte Mainbrücke is one of the most scenic strolls in Germany.","The Mainfränkisches Museum inside holds Tilman Riemenschneider's extraordinary medieval wood sculptures."]},
     {name:"Käppele Sanctuary",emoji:"⛩️",type:"Pilgrimage Church",lat:49.7842417,lng:9.9219083,rating:4.8,facts:["A stunning Baroque pilgrimage chapel by Balthasar Neumann perched on a hill with sweeping city views.","A dramatic staircase with Stations of the Cross sculptures guides you on the approach.","Considered one of the finest Baroque interiors in Germany — the ceiling paintings are breathtaking."]}
   ]},
-  Dresden:{center:[51.053,13.738],zoom:14,landmarks:[
+  Dresden:{center:[51.053,13.738],zoom:14,image:'https://images.unsplash.com/photo-1600253613497-8a39b8b4a5de?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"Frauenkirche",emoji:"⛪",type:"Church / Symbol",lat:51.0518734,lng:13.7415216,rating:4.8,facts:["Destroyed by WWII bombing in 1945, rebuilt stone by stone and reopened in 2005 as a symbol of reconciliation.","Climb to the dome (€10) for breathtaking 360° views over Dresden's skyline and the Elbe.","The dark stones in the facade are original — deliberately left charred to honor the building's wartime history."]},
     {name:"Dresden Zwinger",emoji:"🏛️",type:"Baroque Palace Complex",lat:51.0529962,lng:13.7339266,rating:4.7,facts:["Built 1710–1728 for Augustus the Strong — one of Germany's greatest Baroque architectural masterpieces.","Houses three world-class museums including the Old Masters Gallery with Raphael's Sistine Madonna.","The courtyard and gardens are free to enter — feel like stepping into a royal fairy tale."]},
     {name:"Semperoper",emoji:"🎭",type:"Opera House",lat:51.0544862,lng:13.7352762,rating:4.8,facts:["One of Europe's most celebrated opera houses, designed by Gottfried Semper, opened in 1841.","Home of the Saxon State Opera, which premiered works by Richard Wagner and Richard Strauss here.","Guided tours of the spectacular Neo-Renaissance interior are available on non-performance days."]},
@@ -328,14 +1235,14 @@ const CITIES={
     {name:"Brühl's Terrace",emoji:"🌅",type:"Promenade / Viewpoint",lat:51.0532474,lng:13.7426731,rating:4.7,facts:["Called the 'Balcony of Europe' since the 18th century — elevated walkway above the Elbe with spectacular views.","Built in the 1730s as Count von Brühl's private garden before opening to the public in 1814.","Sunset over the Elbe with Dresden's Baroque skyline is one of Germany's most romantic views."]},
     {name:"Fürstenzug",emoji:"🎨",type:"Porcelain Mural",lat:51.0527909,lng:13.7389032,rating:4.8,facts:["A 102-meter-long mural of 25,000 Meissen porcelain tiles — the world's largest porcelain artwork.","Depicts a procession of 35 Saxon rulers spanning 700 years of Wettin dynasty history.","Remarkably survived the 1945 bombing intact, and the porcelain has barely faded in over 100 years."]}
   ]},
-  Leipzig:{center:[51.338,12.375],zoom:13,landmarks:[
+  Leipzig:{center:[51.338,12.375],zoom:13,image:'https://images.unsplash.com/photo-1607920592519-bab4172cb145?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"Völkerschlachtdenkmal",emoji:"🗿",type:"Monument / Memorial",lat:51.3123671,lng:12.4132675,rating:4.7,facts:["Completed in 1913 for the 100th anniversary of the Battle of Nations — at 91 meters it was Europe's tallest monument.","Inside, giant stone warriors watch over a crypt; climb to two platforms for spectacular Leipzig panoramas.","The battle (1813) involved over 600,000 soldiers — the largest in European history before WWI."]},
     {name:"St. Thomas Church",emoji:"⛪",type:"Historic Church",lat:51.339317,lng:12.3726797,rating:4.7,facts:["Johann Sebastian Bach served as cantor here from 1723 until his death in 1750 — his tomb is beneath the chancel.","The Thomanerchor boys choir has performed here continuously for over 800 years.","Martin Luther preached here in 1539 when Leipzig adopted the Protestant Reformation."]},
     {name:"St. Nicholas Church",emoji:"🕌",type:"Historic Church",lat:51.3403205,lng:12.378489,rating:4.7,facts:["Birthplace of the peaceful revolution — Monday Prayers here eventually led to the fall of the Berlin Wall in 1989.","The striking interior blends Gothic structure with a Neoclassical redesign featuring white palm-leaf columns.","Bach's St. John Passion had its world premiere here in 1724."]},
     {name:"Mädler-Passage",emoji:"🛍️",type:"Historic Arcade",lat:51.3393977,lng:12.3755844,rating:4.7,facts:["A stunning Art Nouveau shopping arcade from 1914 — one of Germany's most beautiful indoor passages.","Goethe's Faust was partly inspired by Auerbachs Keller in the basement here, operating since 1525.","Goethe himself was a regular at Auerbachs Keller during his student years in Leipzig."]},
     {name:"Marktplatz Leipzig",emoji:"🏛️",type:"Central Square",lat:51.3406151,lng:12.3746965,rating:4.6,facts:["Leipzig's central gathering point since the city received trading rights in 1165.","The Altes Rathaus bordering the square is a magnificent Renaissance building from 1556, now a history museum.","On Fridays and Saturdays the square comes alive with markets, street performers, and city life."]}
   ]},
-  Berlin:{center:[52.516,13.388],zoom:13,landmarks:[
+  Berlin:{center:[52.516,13.388],zoom:13,image:'https://images.unsplash.com/photo-1599946347371-68eb71b16afc?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"Brandenburg Gate",emoji:"🏛️",type:"Landmark / Symbol",lat:52.5162746,lng:13.377704,rating:4.7,facts:["Completed in 1791 — Berlin's most iconic symbol, stranded in no-man's-land of the Berlin Wall for 28 years.","The Quadriga sculpture on top was taken to Paris by Napoleon and returned in 1814.","A symbol of German reunification — most spectacular illuminated at night."]},
     {name:"Reichstag",emoji:"🏛️",type:"Government Building",lat:52.5186202,lng:13.3761871,rating:4.7,facts:["Germany's parliament, redesigned with a glass dome by Sir Norman Foster after reunification.","The glass dome is free to visit but must be booked online in advance — bring ID for entry.","Audio guides inside the dome respond to your exact location on the spiraling ramp."]},
     {name:"Berlin Cathedral",emoji:"⛪",type:"Cathedral",lat:52.5190608,lng:13.401078,rating:4.6,facts:["The massive Protestant cathedral took 11 years to build (1894–1905) and can be explored from crypt to dome.","Climb ~270 steps to the top for some of Berlin's finest panoramic views over Museum Island and the Spree.","The crypt beneath holds over 90 sarcophagi of the Hohenzollern dynasty — Prussia's royal family."]},
@@ -346,7 +1253,7 @@ const CITIES={
     {name:"Gendarmenmarkt",emoji:"🏙️",type:"Square / Architecture",lat:52.5132122,lng:13.3925122,rating:4.8,facts:["Often voted Berlin's most beautiful square, flanked by the French and German Cathedrals and the Konzerthaus.","Built by Prussian King Frederick the Great in the 18th century as part of his grand vision for Berlin.","The Christmas market here each December is one of Germany's most atmospheric."]},
     {name:"Hackescher Markt",emoji:"🌆",type:"Market / Cultural Hub",lat:52.5237159,lng:13.4022679,rating:4.5,facts:["A vibrant S-Bahn square in Berlin-Mitte, surrounded by the Art Nouveau Hackesche Höfe courtyard complex.","The Hackesche Höfe (1907) has eight interconnected courtyards with galleries, cafes, and boutiques.","One of Berlin's best neighborhoods for street food, independent shops, and nightlife."]}
   ]},
-  'Münster':{center:[51.962,7.628],zoom:14,landmarks:[
+  'Münster':{center:[51.962,7.628],zoom:14,image:'https://images.unsplash.com/photo-1582236371587-ec52b753b827?auto=format&fit=crop&w=600&q=80',landmarks:[
     {name:"Prinzipalmarkt",emoji:"🏛️",type:"Historic Square",lat:51.9622138,lng:7.628184,rating:4.7,facts:["Münster's stunning Gothic arcaded main street — destroyed in WWII and faithfully rebuilt stone by stone.","The arcades (Lauben) shelter pedestrians and give the street a medieval character unique in Germany.","One of Germany's most beloved Christmas markets takes place here each December."]},
     {name:"St. Paul's Cathedral",emoji:"⛪",type:"Cathedral",lat:51.9629806,lng:7.6257716,rating:4.7,facts:["A magnificent Romanesque-Gothic cathedral nearly 800 years old, one of the finest in Westphalia.","The Astronomical Clock inside (1540) is a marvel of medieval engineering still running accurately.","The Peace of Westphalia was negotiated partly here in 1648, ending the Thirty Years' War and reshaping Europe."]},
     {name:"St. Lambert's Church",emoji:"🕌",type:"Gothic Church",lat:51.9629349,lng:7.628904,rating:4.6,facts:["Famous for the three iron cages on its tower — they held executed Anabaptist leaders in 1536 as a warning.","The church's late-Gothic architecture and slender tower define Münster's skyline.","In Advent, free brass band and organ recitals are held daily at 5pm — a beautiful tradition."]},
@@ -354,6 +1261,7 @@ const CITIES={
     {name:"Promenade",emoji:"🌿",type:"Greenway / Walking Path",lat:51.9668277,lng:7.6233824,rating:4.8,facts:["A 4.5 km circular green belt around Münster's entire old town, built on old city fortifications.","Münster is Germany's cycling capital — the Promenade is a beloved cycle highway used by thousands daily.","The route passes moats, art installations, university buildings, and beautiful parkland."]}
   ]}
 };
+
 
 /* ─── NAV ─── */
 let cityMap=null, ovMap=null, cityMarkers=[];
@@ -386,20 +1294,34 @@ function renderCity(name){
   document.getElementById('sb-count').textContent=city.landmarks.length+' landmarks';
   const list=document.getElementById('sb-list'); list.innerHTML='';
   city.landmarks.forEach((lm,i)=>{
-    const icon=L.divIcon({html:`<div style="width:12px;height:12px;background:#1C1C1C;border:2.5px solid #C8922A;border-radius:50%;cursor:pointer"></div>`,iconSize:[12,12],iconAnchor:[6,6],className:''});
+    const icon=L.divIcon({html:`<div style="width:14px;height:14px;background:#0071E3;border:3px solid #fff;border-radius:50%;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,0.2);"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''});
     const m=L.marker([lm.lat,lm.lng],{icon}).addTo(cityMap);
-    m.on('click',()=>openLm(lm,name,i)); cityMarkers.push(m);
+    m.on('click',()=>openLm(lm,name,i,city.image)); cityMarkers.push(m);
     const d=document.createElement('div'); d.className='litem'; d.id=`li-${name}-${i}`;
     d.innerHTML=`<div class="licon">${lm.emoji}</div><div><div class="lname">${lm.name}</div><div class="ltype">${lm.type}</div></div>`;
-    d.onclick=()=>{cityMap.setView([lm.lat,lm.lng],Math.max(cityMap.getZoom(),15),{animate:true});openLm(lm,name,i);};
+    d.onclick=()=>{cityMap.setView([lm.lat,lm.lng],Math.max(cityMap.getZoom(),15),{animate:true});openLm(lm,name,i,city.image);};
     list.appendChild(d);
   });
 }
-function openLm(lm,city,idx){
+
+function recenterCityMap() {
+  if (!cityMap) return;
+  const activeTab = document.querySelector('.city-tab.active');
+  if (activeTab) {
+    const cityName = activeTab.dataset.city;
+    const city = CITIES[cityName];
+    cityMap.setView(city.center, city.zoom, { animate: true });
+  }
+}
+
+function openLm(lm,city,idx,cityImageUrl){
   document.querySelectorAll('.litem').forEach(e=>e.classList.remove('active'));
   const el=document.getElementById(`li-${city}-${idx}`);
   if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  document.getElementById('lm-ech').textContent=lm.emoji;
+  
+  document.getElementById('lm-img').src = cityImageUrl;
+  document.getElementById('lm-emoji-badge').textContent = lm.emoji;
+  
   document.getElementById('lm-name').textContent=lm.name;
   document.getElementById('lm-tag').textContent=city;
   document.getElementById('lm-rating').innerHTML=lm.rating?'⭐'.repeat(Math.round(lm.rating))+` <span style="margin-left:4px">${lm.rating} / 5.0</span>`:'';
@@ -428,37 +1350,132 @@ function buildItin(){
       <div class="td">${row.end}</div>
       <div class="td dur-col">${row.days>0?row.days:'—'}</div>
       <div class="td note-col">${row.notes}${row.trans==='Train'?'<div class="train-hint">🚆 Train details to be added</div>':''}</div>
-      <div class="td" style="flex-wrap:wrap;gap:3px">${badges.join('')}</div>`;
+      <div class="td" style="flex-wrap:wrap;gap:4px">${badges.join('')}</div>`;
     c.appendChild(d);
   });
 }
 
 /* ─── PAGE 3 ─── */
+const GERMANY_BORDER = [
+  [47.2701,10.1788],[47.5804,10.4778],[47.6965,10.1769],[47.8310,10.4778],
+  [48.2376,8.1324],[48.6936,7.5827],[49.4639,6.3690],[49.9026,6.1330],
+  [50.1280,5.9947],[50.3264,6.3581],[50.3667,6.8521],[51.0513,6.1164],
+  [51.5035,5.8647],[51.8308,5.9542],[52.2297,7.0261],[53.3301,7.2021],
+  [53.6815,8.5807],[54.8336,8.3936],[54.9088,9.4359],[54.4867,9.9270],
+  [54.8259,10.9370],[54.4546,12.5543],[54.0203,13.9900],[53.9558,14.1504],
+  [53.2436,14.4136],[52.9738,14.1260],[51.8325,14.7193],[51.0513,14.9668],
+  [50.4067,12.0869],[50.2551,12.4805],[49.9659,12.5708],[49.7344,13.0371],
+  [48.9772,13.4250],[48.5570,13.4299],[47.9389,12.7813],[47.5200,13.0054],
+  [47.2701,12.2070],[47.0066,10.4778],[47.2701,10.1788]
+];
+
+let trainMarker = null;
+let trainAnimFrame = null;
+let isAnimating = false;
 
 function initOvMap(){
   ovMap=L.map('overview-map',{zoomControl:true});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(ovMap);
   ovMap.setView([51.2,10.6],6);
 
- 
+  L.polygon(GERMANY_BORDER, {
+    color: '#0071E3',
+    weight: 2,
+    opacity: 0.6,
+    fillOpacity: 0,
+    dashArray: null
+  }).addTo(ovMap);
 
-  L.polyline(OV_STOPS.map(s=>[s.lat,s.lng]),{color:'#C8922A',weight:2.5,opacity:.65,dashArray:'6 5'}).addTo(ovMap);
+  L.polyline(OV_STOPS.map(s=>[s.lat,s.lng]),{color:'#0071E3',weight:3,opacity:.5,dashArray:'6 6'}).addTo(ovMap);
   const panel=document.getElementById('ov-stops');
+  
   OV_STOPS.forEach((stop,i)=>{
-    const icon=L.divIcon({html:`<div style="width:28px;height:28px;background:#C8922A;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#1C1C1C;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer">${i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14],className:''});
+    const icon=L.divIcon({html:`<div style="width:30px;height:30px;background:#0071E3;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:pointer;font-family:sans-serif">${i+1}</div>`,iconSize:[30,30],iconAnchor:[15,15],className:''});
     const m=L.marker([stop.lat,stop.lng],{icon}).addTo(ovMap);
-    m.on('click',()=>openOv(stop,i));
+    m.on('click',()=>handleStopClick(stop,i));
     const d=document.createElement('div'); d.className='ov-stop'; d.id=`ovs-${i}`;
     d.innerHTML=`<div class="snum">${i+1}</div><div><div class="ov-stop-name">${stop.emoji} ${stop.city}</div><div class="ov-stop-dates">${stop.start} – ${stop.end}</div><div class="ov-stop-dur">${stop.days>0?stop.days+' night'+(stop.days>1?'s':''):'Transit'}</div></div>`;
-    d.onclick=()=>{ovMap.setView([stop.lat,stop.lng],11,{animate:true});openOv(stop,i);};
+    d.onclick=()=>{handleStopClick(stop,i);};
     panel.appendChild(d);
   });
 }
-function openOv(stop,idx){
+
+function handleStopClick(stop, idx) {
+  if (isAnimating) return; 
+
   document.querySelectorAll('.ov-stop').forEach(e=>e.classList.remove('active'));
   const el=document.getElementById(`ovs-${idx}`);
   if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  document.getElementById('ovc-emoji').textContent=stop.emoji;
+
+  document.getElementById('ov-popup').classList.remove('on');
+
+  if (idx > 0) {
+    isAnimating = true;
+    const prevStop = OV_STOPS[idx - 1];
+
+    ovMap.setView([prevStop.lat, prevStop.lng], 11, {animate: true, duration: 1});
+
+    if (!trainMarker) {
+      const icon = L.divIcon({html:'<div style="font-size:26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">🚂</div>', iconSize:[30,30], iconAnchor:[15,15], className:''});
+      trainMarker = L.marker([prevStop.lat, prevStop.lng], {icon, zIndexOffset: 1000}).addTo(ovMap);
+    } else {
+      trainMarker.setLatLng([prevStop.lat, prevStop.lng]);
+    }
+
+    setTimeout(() => {
+      animateTrain(prevStop, stop, () => {
+        isAnimating = false;
+        showOvPopup(stop, idx);
+      });
+    }, 1200); 
+
+  } else {
+    ovMap.setView([stop.lat, stop.lng], 11, {animate: true});
+    if (!trainMarker) {
+      const icon = L.divIcon({html:'<div style="font-size:26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">🚂</div>', iconSize:[30,30], iconAnchor:[15,15], className:''});
+      trainMarker = L.marker([stop.lat, stop.lng], {icon, zIndexOffset: 1000}).addTo(ovMap);
+    } else {
+      trainMarker.setLatLng([stop.lat, stop.lng]);
+    }
+    showOvPopup(stop, idx);
+  }
+}
+
+function animateTrain(start, end, callback) {
+  if (trainAnimFrame) cancelAnimationFrame(trainAnimFrame);
+
+  const duration = 5000; 
+  let startTime = null; 
+  const startLat = start.lat, startLng = start.lng;
+  const endLat = end.lat, endLng = end.lng;
+
+  function step(time) {
+    if (!startTime) startTime = time; 
+    
+    let progress = (time - startTime) / duration;
+    if (progress < 0) progress = 0; 
+    if (progress > 1) progress = 1;
+    
+    const ease = Math.pow(progress, 2.5);
+    
+    const curLat = startLat + (endLat - startLat) * ease;
+    const curLng = startLng + (endLng - startLng) * ease;
+    
+    trainMarker.setLatLng([curLat, curLng]);
+    ovMap.setView([curLat, curLng], 11, {animate: false});
+    
+    if (progress < 1) {
+      trainAnimFrame = requestAnimationFrame(step);
+    } else {
+      if (callback) callback();
+    }
+  }
+  trainAnimFrame = requestAnimationFrame(step);
+}
+
+function showOvPopup(stop, idx) {
+  document.getElementById('ov-img').src = stop.image;
+  document.getElementById('ovc-emoji-badge').textContent = stop.emoji;
   document.getElementById('ovc-title').textContent=stop.city;
   document.getElementById('ovc-sub').textContent=stop.days>0?stop.days+' night'+(stop.days>1?'s':''):'Transit stop';
   document.getElementById('ovc-dur').textContent=stop.start+' → '+stop.end;
@@ -473,16 +1490,58 @@ function openOv(stop,idx){
   else ac.style.display='none';
   document.getElementById('ov-popup').classList.add('on');
 }
+
 function closeOv(e,force){
   if(force||(e&&e.target===document.getElementById('ov-popup'))){
     document.getElementById('ov-popup').classList.remove('on');
-    document.querySelectorAll('.ov-stop').forEach(el=>el.classList.remove('active'));
+  }
+}
+
+/* ─── PAGE 5 (JOURNAL JS) ─── */
+let leftZ = 100; // Ensures left stack always sits on top
+
+function initJournal() {
+  const papers = document.querySelectorAll('.paper');
+  papers.forEach((p, i) => {
+    // Initial stacking order right-to-left
+    p.dataset.z = papers.length - i;
+    p.style.zIndex = p.dataset.z;
+  });
+}
+
+function flipPaper(el, index) {
+  const book = document.getElementById('journal-book');
+  
+  if (el.classList.contains('flipped')) {
+    // Flipping back right
+    el.classList.remove('flipped');
+    setTimeout(() => {
+      // Revert to original right-stack zIndex halfway through animation
+      el.style.zIndex = el.dataset.z;
+    }, 300);
+    
+    // Close book if the cover is closing
+    if (index === 0) book.classList.remove('open');
+  } else {
+    // Flipping left
+    el.classList.add('flipped');
+    setTimeout(() => {
+      // Elevate zIndex halfway through so it correctly overlays the left stack
+      el.style.zIndex = leftZ++;
+    }, 300);
+    
+    // Open book if cover is opening
+    if (index === 0) book.classList.add('open');
   }
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLm(null,true);closeOv(null,true);}});
 
-window.addEventListener('load',()=>{buildItin();initCityMap();});
+window.addEventListener('load',()=>{
+  buildItin();
+  initCityMap();
+  initJournal();
+});
 </script>
 </body>
 </html>
